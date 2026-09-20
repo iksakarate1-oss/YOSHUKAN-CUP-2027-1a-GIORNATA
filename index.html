@@ -35,7 +35,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Locandina Evento (Immagine)</label>
-                                <input type="file" id="regLocandinaFile" class="form-control" accept="image/*" onchange="convertiImmagine(this, 'locandinaPreview', 'locandina')">
+                                <input type="file" id="regLocandinaFile" class="form-control" accept="image/*" onchange="comprimiImmagine(this, 'locandinaPreview', 'locandina', 800)">
                             </div>
                             <div class="col-12 text-center">
                                 <img id="locandinaPreview" class="preview-locandina mx-auto">
@@ -66,14 +66,14 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Logo Società</label>
                                 <div class="input-group">
-                                    <input type="file" id="regLogoFile" class="form-control" accept="image/*" onchange="convertiImmagine(this, 'logoPreview', 'logo')">
+                                    <input type="file" id="regLogoFile" class="form-control" accept="image/*" onchange="comprimiImmagine(this, 'logoPreview', 'logo', 300)">
                                     <img id="logoPreview" class="preview-img ms-2">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Foto Tecnico / Maestro</label>
                                 <div class="input-group">
-                                    <input type="file" id="regFotoTecnicoFile" class="form-control" accept="image/*" onchange="convertiImmagine(this, 'fotoTecnicoPreview', 'tecnico')">
+                                    <input type="file" id="regFotoTecnicoFile" class="form-control" accept="image/*" onchange="comprimiImmagine(this, 'fotoTecnicoPreview', 'tecnico', 300)">
                                     <img id="fotoTecnicoPreview" class="preview-img ms-2">
                                 </div>
                             </div>
@@ -136,19 +136,47 @@
             aggiungiRigaAtletaForm();
         }
 
-        function convertiImmagine(input, previewId, tipo) {
+        // Funzione per comprimere e ridimensionare l'immagine prima di salvarla
+        function comprimiImmagine(input, previewId, tipo, maxDimensione) {
             let file = input.files[0];
             if (!file) return;
+
             let reader = new FileReader();
             reader.onload = function(e) {
-                let base64String = e.target.result;
-                let imgPreview = document.getElementById(previewId);
-                imgPreview.src = base64String;
-                imgPreview.style.display = (tipo === 'locandina') ? 'block' : 'inline-block';
+                let img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    let canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
 
-                if (tipo === 'logo') logoBase64Temp = base64String;
-                if (tipo === 'tecnico') fotoTecnicoBase64Temp = base64String;
-                if (tipo === 'locandina') locandinaBase64Temp = base64String;
+                    if (width > height) {
+                        if (width > maxDimensione) {
+                            height *= maxDimensione / width;
+                            width = maxDimensione;
+                        }
+                    } else {
+                        if (height > maxDimensione) {
+                            width *= maxDimensione / height;
+                            height = maxDimensione;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    let ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    let base64String = canvas.toDataURL('image/jpeg', 0.7); // Compressione al 70% per alleggerire il file
+
+                    let imgPreview = document.getElementById(previewId);
+                    imgPreview.src = base64String;
+                    imgPreview.style.display = (tipo === 'locandina') ? 'block' : 'inline-block';
+
+                    if (tipo === 'logo') logoBase64Temp = base64String;
+                    if (tipo === 'tecnico') fotoTecnicoBase64Temp = base64String;
+                    if (tipo === 'locandina') locandinaBase64Temp = base64String;
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -217,7 +245,7 @@
                 let peso = parseFloat(r.querySelector('.atl-peso').value) || 0;
 
                 if (nome && cognome) {
-                    nuoviAtleti.push({
+                    nuoviAtleti.posts?.push || nuoviAtleti.push({
                         id: Date.now() + Math.random(),
                         nome,
                         cognome,
@@ -253,7 +281,7 @@
             if (usaFirebase) {
                 database.ref('iscrizioni_pendenti/' + datiSocietaCompleti.id).set({
                     societa: datiSocietaCompleti,
-                    atleti: novosAtleti = nuoviAtleti
+                    atleti: nuoviAtleti
                 }, (error) => {
                     if (error) {
                         alert("Errore durante l'invio: " + error.message);
@@ -269,7 +297,7 @@
         function mostraSuccesso() {
             document.getElementById('messaggioStato').innerHTML = `
                 <div class="alert alert-success text-center fw-bold py-3">
-                    🎉 Iscrizione inviata con successo! I dati, la locandina e il nome del torneo sono stati registrati.
+                    🎉 Iscrizione inviata con successo! I dati, la locandina e il nome del torneo sono stati registrati correttamente.
                 </div>
             `;
             setTimeout(() => {
