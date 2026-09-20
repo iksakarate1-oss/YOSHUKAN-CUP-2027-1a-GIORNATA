@@ -11,7 +11,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            // Inizializzazione EmailJS con la tua Public Key
             emailjs.init("2_4vE-yW-JhTezDTq");
         })();
     </script>
@@ -37,7 +36,6 @@
                     <div class="card p-3 mb-4 bg-white shadow-sm border-primary">
                         <h5 class="fw-bold text-primary mb-3 text-center">🏆 Locandina Ufficiale Evento</h5>
                         <div class="text-center">
-                            <!-- Locandina fissa con percorso pulito senza spazi -->
                             <img id="locandinaFissa" src="locandina.jpg" class="preview-locandina mb-3" alt="Yoshukan Cup 2027 Locandina" onerror="this.style.display='none'">
                             <input type="text" id="regNomeTorneo" class="form-control text-center fw-bold text-dark bg-light" value="YOSHUKAN CUP 2027 - 11 Ottobre" readonly>
                         </div>
@@ -282,7 +280,7 @@
                     if (error) {
                         alert("Errore durante l'invio su Firebase: " + error.message);
                     } else {
-                        // Invio email di notifica tramite EmailJS con il Template ID corretto (template_cexv9ys)
+                        // Invio email con il template ID corretto (template_cexv9ys)
                         let templateParams = {
                             societa_nome: nomeSoc,
                             tecnico_nome: nomeTec,
@@ -310,9 +308,12 @@
         function mostraSuccesso() {
             document.getElementById('messaggioStato').innerHTML = `
                 <div class="alert alert-success text-center fw-bold py-3">
-                    🎉 Iscrizione inviata con successo! L'email di notifica è stata spedita correttamente.
+                    🎉 Iscrizione inviata con successo!
                 </div>
             `;
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
         }
     </script>
 </body>
