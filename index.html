@@ -307,13 +307,24 @@
 
         function mostraSuccesso() {
             document.getElementById('messaggioStato').innerHTML = `
-                <div class="alert alert-success text-center fw-bold py-3">
-                    🎉 Iscrizione inviata con successo!
+                <div class="alert alert-success text-center fw-bold py-3 shadow">
+                    🎉 <strong>Iscrizione inviata con successo!</strong><br>
+                    I dati sono stati registrati correttamente e la notifica è stata spedita.
                 </div>
             `;
-            setTimeout(() => {
-                location.reload();
-            }, 3000);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            document.getElementById('regNomeSocieta').value = '';
+            document.getElementById('regNomeTecnico').value = '';
+            document.getElementById('regEmailSocieta').value = '';
+            document.getElementById('regTelSocieta').value = '';
+            document.getElementById('logoPreview').style.display = 'none';
+            document.getElementById('fotoTecnicoPreview').style.display = 'none';
+            logoBase64Temp = "";
+            fotoTecnicoBase64Temp = "";
+            
+            document.getElementById('righeAtletiBody').innerHTML = '';
+            aggiungiRigaAtletaForm();
         }
     </script>
 </body>
