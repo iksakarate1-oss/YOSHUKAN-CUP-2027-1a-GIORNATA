@@ -282,7 +282,7 @@
                     if (error) {
                         alert("Errore durante l'invio: " + error.message);
                     } else {
-                        // Invio email di notifica tramite EmailJS
+                        // Invio email di notifica tramite EmailJS con il nuovo Service ID
                         let templateParams = {
                             societa_nome: nomeSoc,
                             tecnico_nome: nomeTec,
@@ -292,8 +292,7 @@
                             telefono_societa: telSoc || "Non specificato"
                         };
 
-                        // Service ID e Template ID configurati correttamente
-                        emailjs.send('service_5kxzkz8', 'n3f5qtb', templateParams)
+                        emailjs.send('service_17vqdun', 'n3f5qtb', templateParams)
                             .then(function(response) {
                                 console.log('Email inviata con successo!', response.status, response.text);
                             }, function(error) {
