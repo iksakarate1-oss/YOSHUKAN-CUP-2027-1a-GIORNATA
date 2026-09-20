@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         .preview-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 1px solid #dee2e6; display: none; }
+        .preview-locandina { max-height: 150px; object-fit: contain; border-radius: 8px; border: 1px solid #dee2e6; display: none; margin-top: 10px; }
     </style>
 </head>
 <body class="bg-light py-5">
@@ -19,10 +20,28 @@
                 <div class="card shadow border-0 p-4">
                     <div class="text-center mb-4">
                         <h2 class="fw-bold text-primary">🥋 Portale Iscrizione Società & Atleti</h2>
-                        <p class="text-muted">Compila il modulo per registrare la tua società, caricare i loghi/foto e inserire i tuoi atleti.</p>
+                        <p class="text-muted">Compila il modulo per registrare la tua società, caricare i loghi/foto, la locandina e inserire i tuoi atleti.</p>
                     </div>
 
                     <div id="messaggioStato"></div>
+
+                    <!-- INFORMAZIONI GENERALI TORNEO E LOCANDINA -->
+                    <div class="card p-3 mb-4 bg-white shadow-sm border-primary">
+                        <h5 class="fw-bold text-primary mb-3">🏆 Dati Torneo & Locandina</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nome del Torneo</label>
+                                <input type="text" id="regNomeTorneo" class="form-control" placeholder="Es. Yoshukan Cup 2027 - 1ª Giornata" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Locandina Evento (Immagine)</label>
+                                <input type="file" id="regLocandinaFile" class="form-control" accept="image/*" onchange="convertiImmagine(this, 'locandinaPreview', 'locandina')">
+                            </div>
+                            <div class="col-12 text-center">
+                                <img id="locandinaPreview" class="preview-locandina mx-auto">
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- DATI DELLA SOCIETÀ -->
                     <div class="card p-3 mb-4 bg-white shadow-sm">
@@ -47,14 +66,14 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Logo Società</label>
                                 <div class="input-group">
-                                    <input type="file" id="regLogoFile" class="form-control" accept="image/*" onchange="convertiImmagine(this, 'logoPreview')">
+                                    <input type="file" id="regLogoFile" class="form-control" accept="image/*" onchange="convertiImmagine(this, 'logoPreview', 'logo')">
                                     <img id="logoPreview" class="preview-img ms-2">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Foto Tecnico / Maestro</label>
                                 <div class="input-group">
-                                    <input type="file" id="regFotoTecnicoFile" class="form-control" accept="image/*" onchange="convertiImmagine(this, 'fotoTecnicoPreview')">
+                                    <input type="file" id="regFotoTecnicoFile" class="form-control" accept="image/*" onchange="convertiImmagine(this, 'fotoTecnicoPreview', 'tecnico')">
                                     <img id="fotoTecnicoPreview" class="preview-img ms-2">
                                 </div>
                             </div>
@@ -111,12 +130,13 @@
 
         let logoBase64Temp = "";
         let fotoTecnicoBase64Temp = "";
+        let locandinaBase64Temp = "";
 
         window.onload = function() {
             aggiungiRigaAtletaForm();
         }
 
-        function convertiImmagine(input, previewId) {
+        function convertiImmagine(input, previewId, tipo) {
             let file = input.files[0];
             if (!file) return;
             let reader = new FileReader();
@@ -124,10 +144,11 @@
                 let base64String = e.target.result;
                 let imgPreview = document.getElementById(previewId);
                 imgPreview.src = base64String;
-                imgPreview.style.display = 'inline-block';
+                imgPreview.style.display = (tipo === 'locandina') ? 'block' : 'inline-block';
 
-                if (previewId === 'logoPreview') logoBase64Temp = base64String;
-                if (previewId === 'fotoTecnicoPreview') fotoTecnicoBase64Temp = base64String;
+                if (tipo === 'logo') logoBase64Temp = base64String;
+                if (tipo === 'tecnico') fotoTecnicoBase64Temp = base64String;
+                if (tipo === 'locandina') locandinaBase64Temp = base64String;
             };
             reader.readAsDataURL(file);
         }
@@ -172,13 +193,14 @@
         }
 
         function inviaIscrizioneAlTorneo() {
+            let nomeTorneo = document.getElementById('regNomeTorneo').value.trim();
             let nomeSoc = document.getElementById('regNomeSocieta').value.trim();
             let nomeTec = document.getElementById('regNomeTecnico').value.trim();
             let emailSoc = document.getElementById('regEmailSocieta').value.trim();
             let telSoc = document.getElementById('regTelSocieta').value.trim();
 
-            if (!nomeSoc || !nomeTec) {
-                alert("Inserisci il Nome Società e il Nome del Tecnico!");
+            if (!nomeTorneo || !nomeSoc || !nomeTec) {
+                alert("Inserisci il Nome del Torneo, il Nome Società e il Nome del Tecnico!");
                 return;
             }
 
@@ -204,7 +226,8 @@
                         cintura,
                         specialita,
                         peso,
-                        societa: nomeSoc
+                        societa: nomeSoc,
+                        torneo: nomeTorneo
                     });
                 }
             });
@@ -216,6 +239,8 @@
 
             let datiSocietaCompleti = {
                 id: Date.now(),
+                nomeTorneo: nomeTorneo,
+                locandina: locandinaBase64Temp,
                 nome: nomeSoc,
                 tecnico: nomeTec,
                 email: emailSoc,
@@ -228,7 +253,7 @@
             if (usaFirebase) {
                 database.ref('iscrizioni_pendenti/' + datiSocietaCompleti.id).set({
                     societa: datiSocietaCompleti,
-                    atleti: nuoviAtleti
+                    atleti: novosAtleti = nuoviAtleti
                 }, (error) => {
                     if (error) {
                         alert("Errore durante l'invio: " + error.message);
@@ -244,7 +269,7 @@
         function mostraSuccesso() {
             document.getElementById('messaggioStato').innerHTML = `
                 <div class="alert alert-success text-center fw-bold py-3">
-                    🎉 Iscrizione inviata con successo! I dati sono stati registrati per il torneo.
+                    🎉 Iscrizione inviata con successo! I dati, la locandina e il nome del torneo sono stati registrati.
                 </div>
             `;
             setTimeout(() => {
