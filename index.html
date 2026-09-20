@@ -292,8 +292,8 @@
                             telefono_societa: telSoc || "Non specificato"
                         };
 
-                        // Service ID inserito correttamente
-                        emailjs.send('service_5kxzkz8', 'INSERISCI_TEMPLATE_ID', templateParams)
+                        // Service ID e Template ID configurati correttamente
+                        emailjs.send('service_5kxzkz8', 'n3f5qtb', templateParams)
                             .then(function(response) {
                                 console.log('Email inviata con successo!', response.status, response.text);
                             }, function(error) {
