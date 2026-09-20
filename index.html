@@ -7,6 +7,14 @@
     <!-- SDK Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- SDK EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            // Inserisci qui la tua Public Key di EmailJS
+            emailjs.init("INSERISCI_QUI_PUBLIC_KEY");
+        })();
+    </script>
     <style>
         .preview-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 1px solid #dee2e6; display: none; }
         .preview-locandina { max-height: 350px; object-fit: contain; border-radius: 8px; border: 1px solid #dee2e6; display: block; margin: 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -29,7 +37,6 @@
                     <div class="card p-3 mb-4 bg-white shadow-sm border-primary">
                         <h5 class="fw-bold text-primary mb-3 text-center">🏆 Locandina Ufficiale Evento</h5>
                         <div class="text-center">
-                            <!-- Locandina fissa con percorso pulito senza spazi -->
                             <img id="locandinaFissa" src="locandina.jpg" class="preview-locandina mb-3" alt="Yoshukan Cup 2027 Locandina" onerror="this.style.display='none'">
                             <input type="text" id="regNomeTorneo" class="form-control text-center fw-bold text-dark bg-light" value="YOSHUKAN CUP 2027 - 11 Ottobre" readonly>
                         </div>
@@ -208,7 +215,6 @@
             tbody.appendChild(tr);
         }
 
-        // Funzione integrata per l'invio e la gestione automatica dell'iscrizione
         function inviaIscrizioneAlTorneo() {
             let nomeTorneo = document.getElementById('regNomeTorneo').value.trim();
             let nomeSoc = document.getElementById('regNomeSocieta').value.trim();
@@ -268,6 +274,7 @@
             };
 
             if (usaFirebase) {
+                // 1. Invia i dati a Firebase
                 database.ref('iscrizioni_pendenti/' + datiSocietaCompleti.id).set({
                     societa: datiSocietaCompleti,
                     atleti: novosAtleti
@@ -275,6 +282,24 @@
                     if (error) {
                         alert("Errore durante l'invio: " + error.message);
                     } else {
+                        // 2. Invia anche la notifica via email tramite EmailJS
+                        let templateParams = {
+                            societa_nome: nomeSoc,
+                            tecnico_nome: nomeTec,
+                            num_atleti: novosAtleti.length,
+                            nome_torneo: nomeTorneo,
+                            email_societa: emailSoc || "Non specificata",
+                            telefono_societa: telSoc || "Non specificato"
+                        };
+
+                        // Sostituisci "INSERISCI_SERVICE_ID" e "INSERISCI_TEMPLATE_ID" con i tuoi codici di EmailJS
+                        emailjs.send('INSERISCI_SERVICE_ID', 'INSERISCI_TEMPLATE_ID', templateParams)
+                            .then(function(response) {
+                                console.SUCCESS('Email inviata con successo!', response.status, response.text);
+                            }, function(error) {
+                                console.log('Errore invio email:', error);
+                            });
+
                         mostraSuccesso();
                     }
                 });
@@ -286,7 +311,7 @@
         function mostraSuccesso() {
             document.getElementById('messaggioStato').innerHTML = `
                 <div class="alert alert-success text-center fw-bold py-3">
-                    🎉 Iscrizione inviata con successo! Sarà elaborata nei tabelloni alla conferma.
+                    🎉 Iscrizione inviata con successo! Ti è stata notificata l'email.
                 </div>
             `;
             setTimeout(() => {
