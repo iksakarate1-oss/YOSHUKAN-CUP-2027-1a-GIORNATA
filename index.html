@@ -208,6 +208,7 @@
             tbody.appendChild(tr);
         }
 
+        // Funzione integrata per l'invio e la gestione automatica dell'iscrizione
         function inviaIscrizioneAlTorneo() {
             let nomeTorneo = document.getElementById('regNomeTorneo').value.trim();
             let nomeSoc = document.getElementById('regNomeSocieta').value.trim();
@@ -285,7 +286,7 @@
         function mostraSuccesso() {
             document.getElementById('messaggioStato').innerHTML = `
                 <div class="alert alert-success text-center fw-bold py-3">
-                    🎉 Iscrizione inviata con successo!
+                    🎉 Iscrizione inviata con successo! Sarà elaborata nei tabelloni alla conferma.
                 </div>
             `;
             setTimeout(() => {
