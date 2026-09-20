@@ -11,8 +11,8 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            // Inserisci qui la tua Public Key di EmailJS
-            emailjs.init("INSERISCI_QUI_PUBLIC_KEY");
+            // Inizializzazione EmailJS con la tua Public Key
+            emailjs.init("2_4vE-yW-JhTezDTq");
         })();
     </script>
     <style>
@@ -37,6 +37,7 @@
                     <div class="card p-3 mb-4 bg-white shadow-sm border-primary">
                         <h5 class="fw-bold text-primary mb-3 text-center">🏆 Locandina Ufficiale Evento</h5>
                         <div class="text-center">
+                            <!-- Locandina fissa con percorso pulito senza spazi -->
                             <img id="locandinaFissa" src="locandina.jpg" class="preview-locandina mb-3" alt="Yoshukan Cup 2027 Locandina" onerror="this.style.display='none'">
                             <input type="text" id="regNomeTorneo" class="form-control text-center fw-bold text-dark bg-light" value="YOSHUKAN CUP 2027 - 11 Ottobre" readonly>
                         </div>
@@ -274,7 +275,6 @@
             };
 
             if (usaFirebase) {
-                // 1. Invia i dati a Firebase
                 database.ref('iscrizioni_pendenti/' + datiSocietaCompleti.id).set({
                     societa: datiSocietaCompleti,
                     atleti: novosAtleti
@@ -282,7 +282,7 @@
                     if (error) {
                         alert("Errore durante l'invio: " + error.message);
                     } else {
-                        // 2. Invia anche la notifica via email tramite EmailJS
+                        // Invio email di notifica tramite EmailJS
                         let templateParams = {
                             societa_nome: nomeSoc,
                             tecnico_nome: nomeTec,
@@ -292,10 +292,10 @@
                             telefono_societa: telSoc || "Non specificato"
                         };
 
-                        // Sostituisci "INSERISCI_SERVICE_ID" e "INSERISCI_TEMPLATE_ID" con i tuoi codici di EmailJS
+                        // Ricordati di sostituire 'INSERISCI_SERVICE_ID' e 'INSERISCI_TEMPLATE_ID' con i dati della tua dashboard EmailJS
                         emailjs.send('INSERISCI_SERVICE_ID', 'INSERISCI_TEMPLATE_ID', templateParams)
                             .then(function(response) {
-                                console.SUCCESS('Email inviata con successo!', response.status, response.text);
+                                console.log('Email inviata con successo!', response.status, response.text);
                             }, function(error) {
                                 console.log('Errore invio email:', error);
                             });
