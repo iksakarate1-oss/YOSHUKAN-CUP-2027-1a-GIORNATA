@@ -280,9 +280,9 @@
                     atleti: novosAtleti
                 }, (error) => {
                     if (error) {
-                        alert("Errore durante l'invio: " + error.message);
+                        alert("Errore durante l'invio su Firebase: " + error.message);
                     } else {
-                        // Invio email di notifica tramite EmailJS
+                        // Invio email di notifica tramite EmailJS con il Template ID corretto (template_cexv9ys)
                         let templateParams = {
                             societa_nome: nomeSoc,
                             tecnico_nome: nomeTec,
@@ -292,7 +292,7 @@
                             telefono_societa: telSoc || "Non specificato"
                         };
 
-                        emailjs.send('service_17vqdun', 'template_cexv9yys', templateParams)
+                        emailjs.send('service_17vqdun', 'template_cexv9ys', templateParams)
                             .then(function(response) {
                                 console.log('Email inviata con successo!', response.status, response.text);
                             }, function(error) {
