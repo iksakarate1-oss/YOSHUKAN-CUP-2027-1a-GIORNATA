@@ -282,7 +282,7 @@
                     if (error) {
                         alert("Errore durante l'invio: " + error.message);
                     } else {
-                        // Invio email di notifica tramite EmailJS con il Template ID corretto
+                        // Invio email di notifica tramite EmailJS
                         let templateParams = {
                             societa_nome: nomeSoc,
                             tecnico_nome: nomeTec,
@@ -310,12 +310,9 @@
         function mostraSuccesso() {
             document.getElementById('messaggioStato').innerHTML = `
                 <div class="alert alert-success text-center fw-bold py-3">
-                    🎉 Iscrizione inviata con successo! Ti è stata notificata l'email.
+                    🎉 Iscrizione inviata con successo! L'email di notifica è stata spedita correttamente.
                 </div>
             `;
-            setTimeout(() => {
-                location.reload();
-            }, 3000);
         }
     </script>
 </body>
