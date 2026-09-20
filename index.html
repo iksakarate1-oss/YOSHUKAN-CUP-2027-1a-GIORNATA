@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         .preview-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 1px solid #dee2e6; display: none; }
-        .preview-locandina { max-height: 150px; object-fit: contain; border-radius: 8px; border: 1px solid #dee2e6; display: none; margin-top: 10px; }
+        .preview-locandina { max-height: 200px; object-fit: contain; border-radius: 8px; border: 1px solid #dee2e6; display: none; margin-top: 10px; }
     </style>
 </head>
 <body class="bg-light py-5">
@@ -19,26 +19,24 @@
             <div class="col-md-10">
                 <div class="card shadow border-0 p-4">
                     <div class="text-center mb-4">
-                        <h2 class="fw-bold text-primary">🥋 Portale Iscrizione Società & Atleti</h2>
-                        <p class="text-muted">Compila il modulo per registrare la tua società, caricare i loghi/foto, la locandina e inserire i tuoi atleti.</p>
+                        <h2 class="fw-bold text-primary" id="titoloPrincipaleApp">🥋 Portale Iscrizione Società & Atleti</h2>
+                        <p class="text-muted">Compila il modulo per registrare la tua società, caricare i loghi/foto e inserire i tuoi atleti.</p>
                     </div>
 
                     <div id="messaggioStato"></div>
 
-                    <!-- INFORMAZIONI GENERALI TORNEO E LOCANDINA -->
+                    <!-- INFORMAZIONI GENERALI TORNEO E LOCANDINA (Sincronizzate da Firebase) -->
                     <div class="card p-3 mb-4 bg-white shadow-sm border-primary">
                         <h5 class="fw-bold text-primary mb-3">🏆 Dati Torneo & Locandina</h5>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Nome del Torneo</label>
-                                <input type="text" id="regNomeTorneo" class="form-control" placeholder="Es. Yoshukan Cup 2027 - 1ª Giornata" required>
+                                <input type="text" id="regNomeTorneo" class="form-control" placeholder="Caricamento in corso..." readonly>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Locandina Evento (Immagine)</label>
-                                <input type="file" id="regLocandinaFile" class="form-control" accept="image/*" onchange="comprimiImmagine(this, 'locandinaPreview', 'locandina', 800)">
-                            </div>
-                            <div class="col-12 text-center">
-                                <img id="locandinaPreview" class="preview-locandina mx-auto">
+                            <div class="col-md-6 text-center">
+                                <label class="form-label fw-bold d-block text-start">Locandina Evento Ufficiale</label>
+                                <img id="locandinaVisualizzata" class="preview-locandina mx-auto" alt="Locandina Torneo">
+                                <p id="testoNoLocandina" class="text-muted small m-0">Nessuna locandina caricata sul server.</p>
                             </div>
                         </div>
                     </div>
@@ -121,19 +119,53 @@
             databaseURL: "https://yoshukan-cup-2027-1a-giornata-default-rtdb.firebaseio.com/"
         };
         
+        let database;
         let usaFirebase = false;
+        let nomeTorneoGlobale = "";
+
         if (firebaseConfig.databaseURL !== "INSERISCI_QUI_IL_TUO_DATABASE_URL_FIREBASE") {
             firebase.initializeApp(firebaseConfig);
-            var database = firebase.database();
+            database = firebase.database();
             usaFirebase = true;
         }
 
         let logoBase64Temp = "";
         let fotoTecnicoBase64Temp = "";
-        let locandinaBase64Temp = "";
 
         window.onload = function() {
             aggiungiRigaAtletaForm();
+            if (usaFirebase) {
+                caricaDatiTorneoDaFirebase();
+            }
+        }
+
+        // Funzione per leggere in tempo reale il Nome del Torneo e la Locandina da Firebase
+        function caricaDatiTorneoDaFirebase() {
+            database.ref('configurazione_torneo').on('value', (snapshot) => {
+                let dati = snapshot.val();
+                if (dati) {
+                    nomeTorneoGlobale = dati.nomeTorneo || "Yoshukan Cup 2027";
+                    document.getElementById('regNomeTorneo').value = nomeTorneoGlobale;
+                    document.getElementById('titoloPrincipaleApp.innerHTML') // Correzione titolo dinamico
+                    document.getElementById('titoloPrincipaleApp').innerText = "🥋 " + nomeTorneoGlobale;
+
+                    let imgLocandina = document.getElementById('locandinaVisualizzata');
+                    let txtNoLocandina = document.getElementById('testoNoLocandina');
+
+                    if (dati.locandina) {
+                        imgLocandina.src = dati.locandina;
+                        imgLocandina.style.display = 'block';
+                        txtNoLocandina.style.display = 'none';
+                    } else {
+                        imgLocandina.style.display = 'none';
+                        txtNoLocandina.style.display = 'block';
+                    }
+                } else {
+                    // Valori predefiniti se non ancora impostati su Firebase
+                    document.getElementById('regNomeTorneo').value = "Yoshukan Cup 2027 - 1ª Giornata";
+                    nomeTorneoGlobale = "Yoshukan Cup 2027 - 1ª Giornata";
+                }
+            });
         }
 
         // Funzione per comprimere e ridimensionare l'immagine prima di salvarla
@@ -167,15 +199,14 @@
                     let ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    let base64String = canvas.toDataURL('image/jpeg', 0.7); // Compressione al 70% per alleggerire il file
+                    let base64String = canvas.toDataURL('image/jpeg', 0.7);
 
                     let imgPreview = document.getElementById(previewId);
                     imgPreview.src = base64String;
-                    imgPreview.style.display = (tipo === 'locandina') ? 'block' : 'inline-block';
+                    imgPreview.style.display = 'inline-block';
 
                     if (tipo === 'logo') logoBase64Temp = base64String;
                     if (tipo === 'tecnico') fotoTecnicoBase64Temp = base64String;
-                    if (tipo === 'locandina') locandinaBase64Temp = base64String;
                 }
             };
             reader.readAsDataURL(file);
@@ -221,14 +252,13 @@
         }
 
         function inviaIscrizioneAlTorneo() {
-            let nomeTorneo = document.getElementById('regNomeTorneo').value.trim();
             let nomeSoc = document.getElementById('regNomeSocieta').value.trim();
             let nomeTec = document.getElementById('regNomeTecnico').value.trim();
             let emailSoc = document.getElementById('regEmailSocieta').value.trim();
             let telSoc = document.getElementById('regTelSocieta').value.trim();
 
-            if (!nomeTorneo || !nomeSoc || !nomeTec) {
-                alert("Inserisci il Nome del Torneo, il Nome Società e il Nome del Tecnico!");
+            if (!nomeSoc || !nomeTec) {
+                alert("Inserisci il Nome Società e il Nome del Tecnico!");
                 return;
             }
 
@@ -245,7 +275,7 @@
                 let peso = parseFloat(r.querySelector('.atl-peso').value) || 0;
 
                 if (nome && cognome) {
-                    nuoviAtleti.posts?.push || nuoviAtleti.push({
+                    nuoviAtleti.push({
                         id: Date.now() + Math.random(),
                         nome,
                         cognome,
@@ -255,7 +285,7 @@
                         specialita,
                         peso,
                         societa: nomeSoc,
-                        torneo: nomeTorneo
+                        torneo: nomeTorneoGlobale
                     });
                 }
             });
@@ -267,8 +297,7 @@
 
             let datiSocietaCompleti = {
                 id: Date.now(),
-                nomeTorneo: nomeTorneo,
-                locandina: locandinaBase64Temp,
+                nomeTorneo: nomeTorneoGlobale,
                 nome: nomeSoc,
                 tecnico: nomeTec,
                 email: emailSoc,
@@ -297,7 +326,7 @@
         function mostraSuccesso() {
             document.getElementById('messaggioStato').innerHTML = `
                 <div class="alert alert-success text-center fw-bold py-3">
-                    🎉 Iscrizione inviata con successo! I dati, la locandina e il nome del torneo sono stati registrati correttamente.
+                    🎉 Iscrizione inviata con successo! I dati sono stati registrati per il torneo.
                 </div>
             `;
             setTimeout(() => {
