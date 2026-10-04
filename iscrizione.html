@@ -5,7 +5,7 @@
     <title>Modulo Iscrizione Online - Torneo Karate I.K.S.A.</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .form-card { border-top: 5px solid #0d6efd; background: #fff; }
+        .form-card { border-top: 5px solid #25d366; background: #fff; }
     </style>
 </head>
 <body class="bg-light">
@@ -13,12 +13,18 @@
         
         <div class="text-center mb-4">
             <h1 class="fw-bold">🥋 Modulo Iscrizione Online</h1>
-            <p class="text-muted">Compila il modulo sottostante per iscrivere un atleta al torneo.</p>
+            <p class="text-muted">Compila il modulo per inviare direttamente l'iscrizione via WhatsApp all'organizzazione.</p>
         </div>
 
         <div class="card shadow-sm p-4 form-card">
-            <h3 class="mb-3 text-primary">Inserisci Dati Atleta</h3>
-            <form onsubmit="inviaIscrizioneOnline(event)">
+            <h3 class="mb-3 text-success">Inserisci Dati Atleta</h3>
+            <form onsubmit="inviaIscrizioneWhatsApp(event)">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Il tuo Numero di Telefono (o del Maestro/Referente)</label>
+                    <input type="tel" id="inputTelefonoOrg" class="form-control" value="393899216447" placeholder="Es. 393899216447" required>
+                    <div class="form-text">Numero WhatsApp dell'organizzatore a cui arriverà il messaggio.</div>
+                </div>
+                <hr>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Nome Atleta</label>
                     <input type="text" id="inputNome" class="form-control" placeholder="Es. Mario" required>
@@ -63,7 +69,7 @@
                         <option value="Entrambi">Entrambi (Kata e Kumite)</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">Invia Iscrizione</button>
+                <button type="submit" class="btn btn-success w-100 py-3 fw-bold shadow-sm fs-5">💬 Invia Iscrizione via WhatsApp</button>
             </form>
             <div id="messaggioConferma" class="mt-3"></div>
         </div>
@@ -71,8 +77,9 @@
     </div>
 
     <script>
-        function inviaIscrizioneOnline(e) {
+        function inviaIscrizioneWhatsApp(e) {
             e.preventDefault();
+            let telOrg = document.getElementById('inputTelefonoOrg').value.trim();
             let nome = document.getElementById('inputNome').value.trim();
             let cognome = document.getElementById('inputCognome').value.trim();
             let dataNascita = document.getElementById('inputDataNascita').value;
@@ -81,27 +88,26 @@
             let cintura = document.getElementById('inputCintura').value;
             let specialita = document.getElementById('inputSpecialita').value;
 
-            let nuovoAtleta = {
-                id: Date.now(),
-                nome,
-                cognome,
-                dataNascita,
-                sesso,
-                societa,
-                cintura,
-                specialita
-            };
+            // Creazione del testo formattato per WhatsApp
+            let testo = `🥋 *NUOVA ISCRIZIONE TORNEO* %0A` +
+                        `----------------------------%0A` +
+                        `👤 *Atleta:* ${cognome} ${nome}%0A` +
+                        `🎂 *Data Nascita:* ${dataNascita}%0A` +
+                        `🚻 *Sesso:* ${sesso}%0A` +
+                        `📍 *Società:* ${societa}%0A` +
+                        `🥋 *Cintura:* ${cintura}%0A` +
+                        `🏆 *Specialità:* ${specialita}%0A` +
+                        `----------------------------`;
 
-            let atletiList = JSON.parse(localStorage.getItem('atleti')) || [];
-            atletiList.push(nuovoAtleta);
-            localStorage.setItem('atleti', JSON.stringify(atletiList));
+            // Apertura di WhatsApp con il messaggio precompilato
+            let urlWhatsApp = `https://api.whatsapp.com/send?phone=${telOrg}&text=${testo}`;
+            window.open(urlWhatsApp, '_blank');
 
             document.getElementById('messaggioConferma').innerHTML = `
                 <div class="alert alert-success text-center" role="alert">
-                    ✅ Iscrizione di <strong>${nome} ${cognome}</strong> avvenuta con successo!
+                    ✅ Si sta aprendo WhatsApp con i dati di <strong>${nome} ${cognome}</strong> pronti per l'invio!
                 </div>
             `;
-            e.target.reset();
         }
     </script>
 </body>
