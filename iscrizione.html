@@ -13,20 +13,16 @@
         
         <div class="text-center mb-4">
             <h1 class="fw-bold">🥋 Modulo Iscrizione Online</h1>
-            <p class="text-muted">Compila il modulo per inviare l'iscrizione all'organizzazione via Email o WhatsApp.</p>
+            <p class="text-muted">Compila il modulo sottostante per inviare l'iscrizione via email.</p>
         </div>
 
         <div class="card shadow-sm p-4 form-card">
             <h3 class="mb-3 text-primary">Inserisci Dati Atleta</h3>
-            <form onsubmit="inviaIscrizione(event)">
+            <form onsubmit="inviaIscrizioneEmail(event)">
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Tua Email o Email dell'Organizzazione</label>
+                    <label class="form-label fw-bold">Tua Email (per ricevere l'iscrizione)</label>
                     <input type="email" id="inputEmailOrg" class="form-control" value="tuamail@example.com" placeholder="Inserisci la tua email" required>
-                    <div class="form-text">I dati arriveranno direttamente a questo indirizzo email.</div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Numero WhatsApp (Opzionale)</label>
-                    <input type="tel" id="inputTelefonoOrg" class="form-control" value="393899216447" placeholder="Es. 393899216447">
+                    <div class="form-text">I dati dell'atleta arriveranno direttamente in questa casella di posta.</div>
                 </div>
                 <hr>
                 <div class="mb-3">
@@ -67,16 +63,13 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Specialità</label>
-                    <select id="inputSpecialita" class="form-select" required>
+                    <select id="inputspecialita" class="form-select" required>
                         <option value="Kata">Kata</option>
                         <option value="Kumite">Kumite</option>
                         <option value="Entrambi">Entrambi (Kata e Kumite)</option>
                     </select>
                 </div>
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary py-3 fw-bold shadow-sm fs-5">📧 Invia Iscrizione via Email</button>
-                    <button type="button" class="btn btn-success py-2 fw-bold shadow-sm" onclick="inviaWhatsAppDaModulo()">💬 Oppure Invia via WhatsApp</button>
-                </div>
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm fs-5">📧 Invia Iscrizione via Email</button>
             </form>
             <div id="messaggioConferma" class="mt-3"></div>
         </div>
@@ -84,63 +77,35 @@
     </div>
 
     <script>
-        function raccogliDati() {
-            return {
-                emailOrg: document.getElementById('inputEmailOrg').value.trim(),
-                telOrg: document.getElementById('inputTelefonoOrg').value.trim(),
-                nome: document.getElementById('inputNome').value.trim(),
-                cognome: document.getElementById('inputCognome').value.trim(),
-                dataNascita: document.getElementById('inputDataNascita').value,
-                sesso: document.getElementById('inputSesso').value,
-                societa: document.getElementById('inputSocieta').value.trim(),
-                cintura: document.getElementById('inputCintura').value,
-                specialita: document.getElementById('inputSpecialita').value
-            };
-        }
-
-        function inviaIscrizione(e) {
+        function inviaIscrizioneEmail(e) {
             e.preventDefault();
-            let d = raccogliDati();
+            let emailOrg = document.getElementById('inputEmailOrg').value.trim();
+            let nome = document.getElementById('inputNome').value.trim();
+            let cognome = document.getElementById('inputCognome').value.trim();
+            let dataNascita = document.getElementById('inputDataNascita').value;
+            let sesso = document.getElementById('inputSesso').value;
+            let societa = document.getElementById('inputSocieta').value.trim();
+            let cintura = document.getElementById('inputCintura').value;
+            let specialita = document.getElementById('inputspecialita').value;
 
-            let oggetto = encodeURIComponent(`Nuova Iscrizione Torneo: ${d.cognome} ${d.nome}`);
+            let oggetto = encodeURIComponent(`Nuova Iscrizione Torneo: ${cognome} ${nome}`);
             let corpo = encodeURIComponent(
                 `Nuova iscrizione ricevuta dal modulo online:\n\n` +
-                `- Nome Atleta: ${d.nome} ${d.cognome}\n` +
-                `- Data di Nascita: ${d.dataNascita}\n` +
-                `- Sesso: ${d.sesso}\n` +
-                `- Società: ${d.societa}\n` +
-                `- Cintura: ${d.cintura}\n` +
-                `- Specialità: ${d.specialita}\n`
+                `- Nome Atleta: ${nome} ${cognome}\n` +
+                `- Data di Nascita: ${dataNascita}\n` +
+                `- Sesso: ${sesso}\n` +
+                `- Società: ${societa}\n` +
+                `- Cintura: ${cintura}\n` +
+                `- Specialità: ${specialita}\n`
             );
 
-            window.location.href = `mailto:${d.emailOrg}?subject=${oggetto}&body=${corpo}`;
+            window.location.href = `mailto:${emailOrg}?subject=${oggetto}&body=${corpo}`;
 
             document.getElementById('messaggioConferma').innerHTML = `
                 <div class="alert alert-success text-center" role="alert">
-                    ✅ Si sta aprendo il programma di posta elettronica con l'iscrizione pronta per l'invio a <strong>${d.emailOrg}</strong>!
+                    ✅ Si sta aprendo la tua email con i dati di <strong>${nome} ${cognome}</strong> pronti per l'invio a <strong>${emailOrg}</strong>!
                 </div>
             `;
-        }
-
-        function inviaWhatsAppDaModulo() {
-            let d = raccogliDati();
-            if (!d.nome || !d.cognome) {
-                alert("Compila almeno Nome e Cognome dell'atleta prima di inviare.");
-                return;
-            }
-
-            let testo = `🥋 *NUOVA ISCRIZIONE TORNEO* %0A` +
-                        `----------------------------%0A` +
-                        `👤 *Atleta:* ${d.cognome} ${d.nome}%0A` +
-                        `🎂 *Data Nascita:* ${d.dataNascita}%0A` +
-                        `🚻 *Sesso:* ${d.sesso}%0A` +
-                        `📍 *Società:* ${d.societa}%0A` +
-                        `🥋 *Cintura:* ${d.cintura}%0A` +
-                        `🏆 *Specialità:* ${d.specialita}%0A` +
-                        `----------------------------`;
-
-            let urlWhatsApp = `https://api.whatsapp.com/send?phone=${d.telOrg}&text=${testo}`;
-            window.open(urlWhatsApp, '_blank');
         }
     </script>
 </body>
