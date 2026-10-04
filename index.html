@@ -17,14 +17,18 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-10">
-                <div class="card shadow border-0 p-4">
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold text-primary">🥋 Portale Iscrizione Società & Atleti</h2>
-                        <p class="text-muted">Compila il modulo per registrare l'evento, la tua società, caricare i loghi/foto e inserire i tuoi atleti.</p>
+                <div class="card shadow border-0 p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="fw-bold text-primary mb-0">🥋 Portale Iscrizione Società & Atleti</h2>
+                        <button class="btn btn-outline-secondary btn-sm fw-bold" onclick="mostraSezioneIscrizioni()">📋 Visualizza le mie Iscrizioni</button>
                     </div>
+                    <p class="text-muted">Compila il modulo per registrare l'evento, la tua società, caricare i loghi/foto e inserire i tuoi atleti.</p>
+                </div>
 
-                    <div id="messaggioStato"></div>
+                <div id="messaggioStato"></div>
 
+                <!-- SEZIONE FORM PRINCIPALE -->
+                <div id="sezioneForm" class="card shadow border-0 p-4">
                     <!-- DATI DELL'EVENTO -->
                     <div class="card p-3 mb-4 bg-white shadow-sm border-primary">
                         <h5 class="fw-bold text-primary mb-3">🏆 Dati Evento & Locandina</h5>
@@ -110,6 +114,79 @@
 
                     <button class="btn btn-success w-100 py-3 fw-bold fs-5" onclick="inviaIscrizioneAlTorneo()">🚀 Invia Iscrizione Definitiva</button>
                 </div>
+
+                <!-- SEZIONE VISUALIZZAZIONE ISCRIZIONI ESISTENTI -->
+                <div id="sezioneIscrizioni" class="card shadow border-0 p-4" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold text-primary mb-0">📋 Le mie Iscrizioni Inviate</h4>
+                        <button class="btn btn-outline-secondary btn-sm fw-bold" onclick="tornaAlForm()">🔙 Torna al Form</button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cerca la tua Società per nome:</label>
+                        <div class="input-group">
+                            <input type="text" id="cercaNomeSocieta" class="form-control" placeholder="Inserisci nome società...">
+                            <button class="btn btn-primary" onclick="caricaIscrizioniSalvate()">Cerca</button>
+                        </div>
+                    </div>
+
+                    <div id="contenitoreListaIscrizioni">
+                        <!-- Verranno mostrate qui le iscrizioni trovate -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE DI MODIFICA ATLETA -->
+    <div class="modal fade" id="modaleModifica" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Modifica Atleta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="modSocId">
+                    <input type="hidden" id="modAtletaId">
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" id="modNome" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cognome</label>
+                        <input type="text" id="modCognome" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cintura</label>
+                        <select id="modCintura" class="form-select">
+                            <option value="Bianca">Bianca</option>
+                            <option value="Gialla">Gialla</option>
+                            <option value="Arancione">Arancione</option>
+                            <option value="Verde">Verde</option>
+                            <option value="Blu">Blu</option>
+                            <option value="Marrone">Marrone</option>
+                            <option value="Nera">Nera</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Specialità</label>
+                        <select id="modSpecialita" class="form-select">
+                            <option value="Kata">Kata</option>
+                            <option value="Kumite">Kumite</option>
+                            <option value="Entrambi">Entrambi</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Peso (Kg)</label>
+                        <input type="number" step="0.1" id="modPeso" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="button" class="btn btn-primary" onclick="salvaModificheAtleta()">Salva Modifiche</button>
+                </div>
             </div>
         </div>
     </div>
@@ -134,13 +211,17 @@
 
         window.onload = function() {
             aggiungiRigaAtletaForm();
+            // Se l'utente ha salvato un ID in precedenza sul browser, lo precompiliamo o memorizziamo
+            let ultimoId = localStorage.getItem('ultimo_societa_id');
+            if (ultimoId) {
+                // Eventuale recupero automatico se desiderato
+            }
         }
 
         function convertiImmagine(input, previewId) {
             let file = input.files[0];
             if (!file) return;
             
-            // Controllo dimensione file consigliato (es. max 1MB per evitare problemi con Firebase Realtime Database)
             if (file.size > 1024 * 1024 * 1.5) {
                 alert("L'immagine è troppo grande! Seleziona un'immagine inferiore a 1.5 MB.");
                 input.value = "";
@@ -232,7 +313,7 @@
 
                 if (nome && cognome) {
                     nuoviAtleti.push({
-                        id: Date.now() + Math.random(),
+                        id: 'atl_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
                         nome,
                         cognome,
                         dataNascita,
@@ -266,7 +347,6 @@
             };
 
             if (usaFirebase) {
-                // Inviamo direttamente i dati completi con .set() sul nodo specifico della società
                 database.ref('iscrizioni_pendenti/' + societaId).set({
                     societa: datiSocietaCompleti,
                     atleti: nuoviAtleti
@@ -274,7 +354,8 @@
                     if (error) {
                         alert("Errore durante l'invio su Firebase: " + error.message);
                     } else {
-                        // Aggiorniamo anche il riferimento generale dell'evento
+                        localStorage.setItem('ultimo_societa_id', societaId);
+                        localStorage.setItem('ultima_societa_nome', nomeSoc);
                         database.ref('dettagli_evento').set({
                             nomeEvento: nomeEvento,
                             locandina: locandinaBase64Temp
@@ -296,6 +377,171 @@
             setTimeout(() => {
                 location.reload();
             }, 3000);
+        }
+
+        function mostraSezioneIscrizioni() {
+            document.getElementById('sezioneForm').style.display = 'none';
+            document.getElementById('sezioneIscrizioni').style.display = 'block';
+            let ultimoNome = localStorage.getItem('ultima_societa_nome');
+            if (ultimoNome) {
+                document.getElementById('cercaNomeSocieta').value = ultimoNome;
+                caricaIscrizioniSalvate();
+            }
+        }
+
+        function tornaAlForm() {
+            document.getElementById('sezioneIscrizioni').style.display = 'none';
+            document.getElementById('sezioneForm').style.display = 'block';
+        }
+
+        function caricaIscrizioniSalvate() {
+            let termineRicerca = document.getElementById('cercaNomeSocieta').value.trim().toLowerCase();
+            let contenitore = document.getElementById('contenitoreListaIscrizioni');
+            
+            if (!usaFirebase) {
+                contenitore.innerHTML = '<p class="text-danger">Firebase non connesso.</p>';
+                return;
+            }
+
+            contenitore.innerHTML = '<p class="text-muted">Ricerca in corso...</p>';
+
+            database.ref('iscrizioni_pendenti').once('value', (snapshot) => {
+                let dati = snapshot.val();
+                if (!dati) {
+                    contenitore.innerHTML = '<p class="text-muted">Nessuna iscrizione trovata nel sistema.</p>';
+                    return;
+                }
+
+                let html = '';
+                let trovati = 0;
+
+                Object.keys(dati).forEach(socKey => {
+                    let iscrizione = dati[socKey];
+                    let soc = iscrizione.societa;
+                    let atleti = iscrizione.atleti || [];
+
+                    if (!termineRicerca || soc.nome.toLowerCase().includes(termineRicerca)) {
+                        trovati++;
+                        html += `
+                            <div class="card border mb-4 shadow-sm p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <h5 class="fw-bold text-primary mb-1">🏢 ${soc.nome}</h5>
+                                        <p class="text-muted mb-0 small">Evento: <strong>${soc.nomeEvento || 'N/D'}</strong> | Tecnico: ${soc.tecnico} | Data: ${soc.dataRegistrazione}</p>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="eliminaInteraIscrizione('${socKey}')">🗑️ Elimina Società</button>
+                                </div>
+                                <div class="table-responsive mt-2">
+                                    <table class="table table-sm table-bordered align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Atleta</th>
+                                                <th>Nascita</th>
+                                                <th>Sesso</th>
+                                                <th>Cintura</th>
+                                                <th>Specialità</th>
+                                                <th>Peso</th>
+                                                <th class="text-center" style="width: 100px;">Azioni</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                        `;
+
+                        atleti.forEach((atl, index) => {
+                            html += `
+                                <tr>
+                                    <td>${atl.nome} ${atl.cognome}</td>
+                                    <td>${atl.dataNascita || '-'}</td>
+                                    <td>${atl.sesso}</td>
+                                    <td>${atl.cintura}</td>
+                                    <td>${atl.specialita}</td>
+                                    <td>${atl.peso} Kg</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-warning py-0 px-1" onclick="apriModificaAtleta('${socKey}', ${index})">✏️</button>
+                                        <button class="btn btn-sm btn-danger py-0 px-1" onclick="eliminaAtleta('${socKey}', ${index})">🗑️</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+
+                        html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                if (trovati === 0) {
+                    contenitore.innerHTML = '<p class="text-warning">Nessuna società trovata con questo nome.</p>';
+                } else {
+                    contenitore.innerHTML = html;
+                }
+            });
+        }
+
+        function eliminaInteraIscrizione(socKey) {
+            if (confirm("Sei sicuro di voler eliminare questa iscrizione e tutti i suoi atleti?")) {
+                database.ref('iscrizioni_pendenti/' + socKey).remove().then(() => {
+                    caricaIscrizioniSalvate();
+                });
+            }
+        }
+
+        function eliminaAtleta(socKey, atletaIndex) {
+            if (confirm("Vuoi rimuovere questo atleta dall'iscrizione?")) {
+                database.ref('iscrizioni_pendenti/' + socKey + '/atleti').once('value', (snapshot) => {
+                    let atleti = snapshot.val();
+                    if (atleti) {
+                        atleti.splice(atletaIndex, 1);
+                        database.ref('iscrizioni_pendenti/' + socKey + '/atleti').set(atleti).then(() => {
+                            caricaIscrizioniSalvate();
+                        });
+                    }
+                });
+            }
+        }
+
+        let modalModificaIstanza = null;
+        function apriModificaAtleta(socKey, atletaIndex) {
+            database.ref('iscrizioni_pendenti/' + socKey + '/atleti/' + atletaIndex).once('value', (snapshot) => {
+                let atl = snapshot.val();
+                if (atl) {
+                    document.getElementById('modSocId').value = socKey;
+                    document.getElementById('modAtletaId').value = atletaIndex;
+                    document.getElementById('modNome').value = atl.nome;
+                    document.getElementById('modCognome').value = atl.cognome;
+                    document.getElementById('modCintura').value = atl.cintura;
+                    document.getElementById('modSpecialita').value = atl.specialita;
+                    document.getElementById('modPeso').value = atl.peso;
+
+                    if (!modalModificaIstanza) {
+                        modalModificaIstanza = new bootstrap.Modal(document.getElementById('modaleModifica'));
+                    }
+                    modalModificaIstanza.show();
+                }
+            });
+        }
+
+        function salvaModificheAtleta() {
+            let socKey = document.getElementById('modSocId').value;
+            let atletaIndex = document.getElementById('modAtletaId').value;
+
+            let aggiornamenti = {
+                nome: document.getElementById('modNome').value.trim(),
+                cognome: document.getElementById('modCognome').value.trim(),
+                cintura: document.getElementById('modCintura').value,
+                specialita: document.getElementById('modSpecialita').value,
+                peso: parseFloat(document.getElementById('modPeso').value) || 0
+            };
+
+            database.ref('iscrizioni_pendenti/' + socKey + '/atleti/' + atletaIndex).update(aggiornamenti).then(() => {
+                if (modalModificaIstanza) {
+                    modalModificaIstanza.hide();
+                }
+                caricaIscrizioniSalvate();
+            });
         }
     </script>
 </body>
