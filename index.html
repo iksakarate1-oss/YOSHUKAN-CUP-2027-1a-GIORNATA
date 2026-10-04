@@ -2,111 +2,323 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>YOSHUKAN CUP 2027 - Iscrizione Online</title>
+    <title>Piattaforma Gestionale Torneo Karate - Home</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- SDK Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <!-- SDK EmailJS -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script type="text/javascript">
-        (function() {
-            emailjs.init("2_4vE-yW-JhTezDTq");
-        })();
-    </script>
     <style>
-        .preview-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 1px solid #dee2e6; display: none; }
-        .preview-locandina { max-height: 350px; object-fit: contain; border-radius: 8px; border: 1px solid #dee2e6; display: block; margin: 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .logo-societa { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; }
+        .locandina-preview { max-height: 250px; object-fit: contain; border-radius: 8px; border: 1px solid #dee2e6; }
+        .card-stat { border-left: 5px solid #0d6efd; background: #fff; }
+        .gpg-card { border-left: 5px solid #ffc107; background: #fffdf5; }
+        .evento-card { border-left: 5px solid #198754; background: #f4faf6; }
+        .classifica-card { border-left: 5px solid #6610f2; background: #f8f6fc; }
+        .verifica-card { border-left: 5px solid #0dcaf0; background: #f0fbfe; }
+
+        /* Stili specifici per la Stampa */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #areaStampaSocieta, #areaStampaSocieta * {
+                visibility: visible;
+            }
+            #areaStampaSocieta {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .pagina-societa {
+                page-break-after: always;
+                margin-bottom: 20px;
+            }
+        }
     </style>
 </head>
-<body class="bg-light py-5">
+<body class="bg-light" onload="caricaInizialeIndex()">
+    <div class="container my-5">
+        
+        <!-- Intestazione e Logo -->
+        <div class="text-center mb-4">
+            <div id="containerLogoPrincipale" class="mb-2"></div>
+            <h1 id="titoloEventoHeader" class="fw-bold">🥋 Piattaforma Gestionale Torneo Karate I.K.S.A.</h1>
+            <p id="sottotitoloEventoHeader" class="text-muted">Gestione completa di Società, Atleti, Tabelloni, Classifiche Kata/Kumite e G.P.G.</p>
+        </div>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <div class="card shadow border-0 p-4">
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold text-primary">🥋 YOSHUKAN CUP 2027</h2>
-                        <p class="text-muted">Domenica 11 Ottobre - Palazzetto dello Sport Marco Saitta (Misilmeri)</p>
+        <!-- Menu di Navigazione Principale -->
+        <div class="row text-center mb-4 g-2">
+            <div class="col-md-2"><a href="index.html" class="btn btn-primary w-100 py-3 shadow-sm">Home & Report</a></div>
+            <div class="col-md-2"><a href="societa.html" class="btn btn-outline-primary w-100 py-3 shadow-sm">Società & Tecnici</a></div>
+            <div class="col-md-2"><a href="atleti.html" class="btn btn-outline-primary w-100 py-3 shadow-sm">Atleti</a></div>
+            <div class="col-md-2"><a href="KATA.html" class="btn btn-outline-primary w-100 py-3 shadow-sm">Kata</a></div>
+            <div class="col-md-2"><a href="KUMITE.html" class="btn btn-outline-primary w-100 py-3 shadow-sm">Kumite</a></div>
+            <div class="col-md-2"><a href="#sezioneVerificaIscrizione" class="btn btn-info text-white w-100 py-3 shadow-sm fw-bold">🔍 Verifica Iscrizione</a></div>
+        </div>
+
+        <!-- SEZIONE: Verifica Iscrizione in Autonomia per Utenti/Società -->
+        <div id="sezioneVerificaIscrizione" class="card shadow-sm p-4 mb-4 verifica-card">
+            <div class="text-center mb-3">
+                <h3 class="text-info text-dark fw-bold mb-1">🔍 Verifica la tua Iscrizione in Autonomia</h3>
+                <p class="text-muted mb-0">Inserisci il cognome dell'atleta o il nome della società per verificare lo stato dell'iscrizione in tempo reale.</p>
+            </div>
+            <div class="row g-3 justify-content-center">
+                <div class="col-md-8">
+                    <div class="input-group input-group-lg shadow-sm">
+                        <input type="text" id="inputCercaIscrizionePubblica" class="form-control" placeholder="Es. Rossi (Cognome) o ASD Ken Zen (Società)..." onkeypress="gestisciInvioRicerca(event)">
+                        <button class="btn btn-info text-white fw-bold px-4" type="button" onclick="cercaIscrizioneAutonoma()">Cerca</button>
                     </div>
+                </div>
+            </div>
+            <div id="containerRisultatiVerifica" class="mt-4">
+                <!-- I risultati compariranno qui -->
+            </div>
+        </div>
 
-                    <div id="messaggioStato"></div>
+        <!-- Sezione Configurazione & Dettagli Evento + Locandina -->
+        <div class="card shadow-sm p-4 mb-4 evento-card">
+            <h3 class="mb-3 text-success">🏆 Configurazione Evento & Locandina</h3>
+            <div class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Nome Evento</label>
+                        <input type="text" id="inputNomeEvento" class="form-control" placeholder="Es. Trofeo Internazionale I.K.S.A.">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Luogo</label>
+                        <input type="text" id="inputLuogoEvento" class="form-control" placeholder="Es. Palasport Comunale, Palermo">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Data Evento</label>
+                        <input type="date" id="inputDataEvento" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Locandina Ufficiale</label>
+                        <input type="file" id="inputLocandinaFile" class="form-control" accept="image/*">
+                    </div>
+                    <button class="btn btn-success w-100 mt-2" onclick="salvaDettagliEvento()">💾 Salva Dettagli Evento</button>
+                </div>
+                <div class="col-md-7 text-center">
+                    <label class="form-label fw-bold d-block">Anteprima Locandina & Info</label>
+                    <div id="containerLocandinaVisualizza" class="p-2 bg-white rounded shadow-sm border">
+                        <p class="text-muted my-5">Nessuna locandina caricata. Configura i dati a sinistra.</p>
+                    </div>
+                    <button class="btn btn-outline-dark w-100 mt-3" onclick="archiviaEventoCorrente()">📦 Archivia Evento Corrente nello Storico</button>
+                </div>
+            </div>
+        </div>
 
-                    <!-- 1. DATI DEL TORNEO E LOCANDINA FISSA -->
-                    <div class="card p-3 mb-4 bg-white shadow-sm border-primary">
-                        <h5 class="fw-bold text-primary mb-3 text-center">🏆 Locandina Ufficiale Evento</h5>
-                        <div class="text-center">
-                            <img id="locandinaFissa" src="locandina.jpg" class="preview-locandina mb-3" alt="Yoshukan Cup 2027 Locandina" onerror="this.style.display='none'">
-                            <input type="text" id="regNomeTorneo" class="form-control text-center fw-bold text-dark bg-light" value="YOSHUKAN CUP 2027 - 11 Ottobre" readonly>
+        <!-- SEZIONE: Classifiche Separate Kata e Kumite (con Giornate) -->
+        <div class="card shadow-sm p-4 mb-4 classifica-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h3 class="text-dark fw-bold mb-1">🏅 Classifiche Ufficiali (Kata & Kumite)</h3>
+                    <p class="text-muted mb-0">Punteggi: 1° Posto = 10 pt | 2° Posto = 6 pt | 3° Posto = 3 pt</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <select id="selezionaGiornataFiltro" class="form-select" onchange="aggiornaTabellaClassifiche()">
+                        <option value="TUTTE">📅 Tutte le Giornate</option>
+                    </select>
+                    <button class="btn btn-dark text-white text-nowrap" onclick="apriModalNuovaGiornata()">➕ Gestisci Giornate</button>
+                </div>
+            </div>
+
+            <!-- Tab Principali: Kata vs Kumite -->
+            <ul class="nav nav-pills mb-3" id="specialitaClassificaTab" role="tablist">
+                <li class="nav-item me-2" role="presentation">
+                    <button class="nav-link active fw-bold" id="pill-kata" data-bs-toggle="pill" data-bs-target="#pane-kata" type="button" onclick="selezionaSpecClassifica('Kata')">🥋 Classifica KATA</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold" id="pill-kumite" data-bs-toggle="pill" data-bs-target="#pane-kumite" type="button" onclick="selezionaSpecClassifica('Kumite')">🥊 Classifica KUMITE</button>
+                </li>
+            </ul>
+
+            <div class="tab-content bg-white p-3 rounded shadow-sm border" id="specialitaClassificaContent">
+                
+                <!-- PANE KATA -->
+                <div class="tab-pane fade show active" id="pane-kata" role="tabpanel">
+                    <h5 class="fw-bold text-primary mb-3">📊 Classifiche Kata (Società & Atleti)</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-secondary">Società - Kata</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped align-middle mb-0">
+                                    <thead class="table-primary">
+                                        <tr><th>Pos</th><th>Società</th><th class="text-center">Ori</th><th class="text-center">Argenti</th><th class="text-center">Bronzi</th><th class="text-center">Punti</th></tr>
+                                    </thead>
+                                    <tbody id="tabSocKata">
+                                        <tr><td colspan="6" class="text-center text-muted">Nessun dato Kata.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-secondary">Atleti - Kata</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped align-middle mb-0">
+                                    <thead class="table-primary">
+                                        <tr><th>Pos</th><th>Atleta</th><th>Società</th><th class="text-center">Punti</th></tr>
+                                    </thead>
+                                    <tbody id="tabAtlKata">
+                                        <tr><td colspan="4" class="text-center text-muted">Nessun dato Kata.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- 2. DATI DELLA SOCIETÀ -->
-                    <div class="card p-3 mb-4 bg-white shadow-sm">
-                        <h5 class="fw-bold text-dark mb-3">🏢 Dati Società, Tecnico & Immagini</h5>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Nome Società</label>
-                                <input type="text" id="regNomeSocieta" class="form-control" placeholder="Es. Asd Karate Club Palermo" required>
+                <!-- PANE KUMITE -->
+                <div class="tab-pane fade" id="pane-kumite" role="tabpanel">
+                    <h5 class="fw-bold text-success mb-3">📊 Classifiche Kumite (Società & Atleti)</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-secondary">Società - Kumite</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped align-middle mb-0">
+                                    <thead class="table-success">
+                                        <tr><th>Pos</th><th>Società</th><th class="text-center">Ori</th><th class="text-center">Argenti</th><th class="text-center">Bronzi</th><th class="text-center">Punti</th></tr>
+                                    </thead>
+                                    <tbody id="tabSocKumite">
+                                        <tr><td colspan="6" class="text-center text-muted">Nessun dato Kumite.</td></tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Nome Tecnico / Referente</label>
-                                <input type="text" id="regNomeTecnico" class="form-control" placeholder="Es. Sensei Mario Rossi" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Email</label>
-                                <input type="email" id="regEmailSocieta" class="form-control" placeholder="email@societa.it">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Telefono</label>
-                                <input type="text" id="regTelSocieta" class="form-control" placeholder="3331234567">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Logo Società</label>
-                                <div class="input-group">
-                                    <input type="file" id="regLogoFile" class="form-control" accept="image/*" onchange="comprimiImmagine(this, 'logoPreview', 'logo', 300)">
-                                    <img id="logoPreview" class="preview-img ms-2">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Foto Tecnico / Maestro</label>
-                                <div class="input-group">
-                                    <input type="file" id="regFotoTecnicoFile" class="form-control" accept="image/*" onchange="comprimiImmagine(this, 'fotoTecnicoPreview', 'tecnico', 300)">
-                                    <img id="fotoTecnicoPreview" class="preview-img ms-2">
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-secondary">Atleti - Kumite</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped align-middle mb-0">
+                                    <thead class="table-success">
+                                        <tr><th>Pos</th><th>Atleta</th><th>Società</th><th class="text-center">Punti</th></tr>
+                                    </thead>
+                                    <tbody id="tabAtlKumite">
+                                        <tr><td colspan="4" class="text-center text-muted">Nessun dato Kumite.</td></tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- 3. ELENCO ATLETI -->
-                    <div class="card p-3 mb-4 bg-white shadow-sm">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="fw-bold text-dark mb-0">👥 Elenco Atleti della Società</h5>
-                            <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="aggiungiRigaAtletaForm()">➕ Aggiungi Atleta</button>
-                        </div>
-                        
-                        <div class="table-responsive">
-                            <table class="table table-bordered align-middle" id="tabellaAtletiForm">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nome</th>
-                                        <th>Cognome</th>
-                                        <th>Data Nascita</th>
-                                        <th>Sesso</th>
-                                        <th>Cintura</th>
-                                        <th>Specialità</th>
-                                        <th>Peso (Kg)</th>
-                                        <th style="width: 50px;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="righeAtletiBody">
-                                    <!-- Righe dinamiche -->
-                                </tbody>
-                            </table>
-                        </div>
+            </div>
+        </div>
+
+        <!-- Sezione Storico Eventi Archiviati -->
+        <div class="card shadow-sm p-4 mb-4">
+            <h3 class="mb-3 text-secondary">📂 Archivio Storico Eventi</h3>
+            <div id="containerArchivio" class="row g-3">
+                <p class="text-muted">Nessun evento archiviato nello storico.</p>
+            </div>
+        </div>
+
+        <!-- Sezione Report Completo dell'Evento -->
+        <div class="card shadow-sm p-4 mb-4 card-stat">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="text-primary mb-0">📊 Report Completo dell'Evento Attuale</h3>
+                <button class="btn btn-primary shadow-sm" onclick="stampaListaPerSocieta()">🖨️ Stampa Lista per Società</button>
+            </div>
+            <div class="row text-center g-3">
+                <div class="col-md-3">
+                    <div class="p-3 border rounded bg-white shadow-sm">
+                        <h5 class="text-muted">Società Iscritte</h5>
+                        <h2 id="statSocieta" class="fw-bold text-dark">0</h2>
                     </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 border rounded bg-white shadow-sm">
+                        <h5 class="text-muted">Atleti iscritti</h5>
+                        <h2 id="statAtletiTotali" class="fw-bold text-secondary">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 border rounded bg-white shadow-sm">
+                        <h5 class="text-muted">Tabelloni Kata</h5>
+                        <h2 id="statTabelloniKata" class="fw-bold text-danger">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 border rounded bg-white shadow-sm">
+                        <h5 class="text-muted">Tabelloni Kumite</h5>
+                        <h2 id="statTabelloniKumite" class="fw-bold text-success">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <button class="btn btn-success w-100 py-3 fw-bold fs-5" onclick="inviaIscrizioneAlTorneo()">🚀 Invia Iscrizione Definitiva</button>
+        <!-- Sezione Gran Premio Giovanissimi (G.P.G.) U10 -->
+        <div class="card shadow-sm p-4 mb-4 gpg-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h3 class="text-warning text-dark fw-bold mb-1">🌟 Gran Premio Giovanissimi (G.P.G.) - U10</h3>
+                    <p class="text-muted mb-0">Attività promozionale per bambini Under 10. Nessuna classifica, nessun vincitore, solo partecipazione e divertimento!</p>
+                </div>
+                <button class="btn btn-warning fw-bold text-dark" onclick="caricaListaGPG()">🔄 Aggiorna Lista GPG</button>
+            </div>
+            
+            <div class="table-responsive bg-white rounded p-3 shadow-sm">
+                <table class="table table-striped align-middle mb-0">
+                    <thead class="table-warning">
+                        <tr>
+                            <th>#</th>
+                            <th>Atleta</th>
+                            <th>Età</th>
+                            <th>Sesso</th>
+                            <th>Società</th>
+                            <th>Cintura</th>
+                            <th class="text-center">Stato Incontro (Promozionale)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabellaGPGBody">
+                        <tr><td colspan="7" class="text-center text-muted">Nessun bambino U10 trovato nel database.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Contenitore Nascosto per la Generazione e Stampa della Lista per Società -->
+    <div id="areaStampaSocieta" class="d-none d-print-block"></div>
+
+    <!-- Modale Gestione Giornate Torneo -->
+    <div class="modal fade" id="modalGiornate" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">📅 Gestione Giornate di Gara</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nome Nuova Giornata / Turno</label>
+                        <input type="text" id="inputNomeGiornata" class="form-control" placeholder="Es. 1ª Giornata - Eliminatorie Kata">
+                    </div>
+                    <button class="btn btn-success w-100 mb-3" onclick="aggiungiGiornataTorneo()">➕ Aggiungi Giornata</button>
+                    <hr>
+                    <h6 class="fw-bold">Giornate Registrate:</h6>
+                    <ul id="listaGiornateModal" class="list-group">
+                        <li class="list-group-item text-muted">Nessuna giornata aggiunta.</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale per Visualizzare Evento Archiviato -->
+    <div class="modal fade" id="modalStorico" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalStoricoTitolo">Dettagli Evento Archiviato</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalStoricoBody">
+                    <!-- Contenuto dinamico -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
                 </div>
             </div>
         </div>
@@ -114,217 +326,476 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const firebaseConfig = {
-            databaseURL: "https://yoshukan-cup-2027-1a-giornata-default-rtdb.firebaseio.com/"
-        };
-        
-        let usaFirebase = false;
-        if (firebaseConfig.databaseURL !== "INSERISCI_QUI_IL_TUO_DATABASE_URL_FIREBASE") {
-            firebase.initializeApp(firebaseConfig);
-            var database = firebase.database();
-            usaFirebase = true;
-        }
+        let locandinaBase64Temp = "";
+        let specCorrenteClassifica = "Kata";
 
-        let logoBase64Temp = "";
-        let fotoTecnicoBase64Temp = "";
-
-        window.onload = function() {
-            aggiungiRigaAtletaForm();
-        }
-
-        function comprimiImmagine(input, previewId, tipo, maxDimensione) {
-            let file = input.files[0];
+        document.getElementById('inputLocandinaFile').addEventListener('change', function(e) {
+            let file = e.target.files[0];
             if (!file) return;
-
             let reader = new FileReader();
-            reader.onload = function(e) {
-                let img = new Image();
-                img.src = e.target.result;
-                img.onload = function() {
-                    let canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > maxDimensione) {
-                            height *= maxDimensione / width;
-                            width = maxDimensione;
-                        }
-                    } else {
-                        if (height > maxDimensione) {
-                            width *= maxDimensione / height;
-                            height = maxDimensione;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    let ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    let base64String = canvas.toDataURL('image/jpeg', 0.7);
-
-                    let imgPreview = document.getElementById(previewId);
-                    imgPreview.src = base64String;
-                    imgPreview.style.display = 'inline-block';
-
-                    if (tipo === 'logo') logoBase64Temp = base64String;
-                    if (tipo === 'tecnico') fotoTecnicoBase64Temp = base64String;
-                }
+            reader.onload = function(uploadEvent) {
+                locandinaBase64Temp = uploadEvent.target.result;
             };
             reader.readAsDataURL(file);
+        });
+
+        function calcolaEta(dataNascita) {
+            if (!dataNascita) return 0;
+            return new Date().getFullYear() - new Date(dataNascita).getFullYear();
         }
 
-        function aggiungiRigaAtletaForm() {
-            let tbody = document.getElementById('righeAtletiBody');
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" class="form-control form-control-sm atl-nome" placeholder="Nome"></td>
-                <td><input type="text" class="form-control form-control-sm atl-cognome" placeholder="Cognome"></td>
-                <td><input type="date" class="form-control form-control-sm atl-nascita"></td>
-                <td>
-                    <select class="form-select form-select-sm atl-sesso">
-                        <option value="M">M</option>
-                        <option value="F">F</option>
-                    </select>
-                </td>
-                <td>
-                    <select class="form-select form-select-sm atl-cintura">
-                        <option value="Bianca">Bianca</option>
-                        <option value="Gialla">Gialla</option>
-                        <option value="Arancione">Arancione</option>
-                        <option value="Verde">Verde</option>
-                        <option value="Blu">Blu</option>
-                        <option value="Marrone">Marrone</option>
-                        <option value="Nera">Nera</option>
-                    </select>
-                </td>
-                <td>
-                    <select class="form-select form-select-sm atl-specialita">
-                        <option value="Kata">Kata</option>
-                        <option value="Kumite">Kumite</option>
-                        <option value="Entrambi">Entrambi</option>
-                    </select>
-                </td>
-                <td><input type="number" step="0.1" class="form-control form-control-sm atl-peso" placeholder="Kg"></td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">🗑️</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+        function caricaInizialeIndex() {
+            caricaReportEvento();
+            caricaDettagliEventoSalvati();
+            caricaStoricoEventi();
+            popolaSelectGiornate();
+            aggiornaTabellaClassifiche();
         }
 
-        function inviaIscrizioneAlTorneo() {
-            let nomeTorneo = document.getElementById('regNomeTorneo').value.trim();
-            let nomeSoc = document.getElementById('regNomeSocieta').value.trim();
-            let nomeTec = document.getElementById('regNomeTecnico').value.trim();
-            let emailSoc = document.getElementById('regEmailSocieta').value.trim();
-            let telSoc = document.getElementById('regTelSocieta').value.trim();
+        function caricaDettagliEventoSalvati() {
+            let info = JSON.parse(localStorage.getItem('infoEventoCorrente')) || {};
+            if (info.nome) document.getElementById('inputNomeEvento').value = info.nome;
+            if (info.luogo) document.getElementById('inputLuogoEvento').value = info.luogo;
+            if (info.data) document.getElementById('inputDataEvento').value = info.data;
+            if (info.locandina) {
+                locandinaBase64Temp = info.locandina;
+                document.getElementById('containerLocandinaVisualizza').innerHTML = `
+                    <img src="${info.locandina}" class="locandina-preview mb-2">
+                    <h5 class="fw-bold text-success">${info.nome || ''}</h5>
+                    <p class="text-muted small mb-0">📍 ${info.luogo || ''} | 📅 ${info.data || ''}</p>
+                `;
+            }
+            if (info.nome) {
+                document.getElementById('titoloEventoHeader').innerText = `🥋 ${info.nome}`;
+                document.getElementById('sottotitoloEventoHeader').innerText = `Luogo: ${info.luogo || 'N.D.'} - Data: ${info.data || 'N.D.'}`;
+            }
+        }
 
-            if (!nomeSoc || !nomeTec) {
-                alert("Inserisci il Nome Società e il Nome del Tecnico!");
+        function salvaDettagliEvento() {
+            let nome = document.getElementById('inputNomeEvento').value.trim();
+            let luogo = document.getElementById('inputLuogoEvento').value.trim();
+            let data = document.getElementById('inputDataEvento').value;
+
+            let info = {
+                nome,
+                luogo,
+                data,
+                locandina: locandinaBase64Temp || (JSON.parse(localStorage.getItem('infoEventoCorrente')) || {}).locandina || ""
+            };
+
+            localStorage.setItem('infoEventoCorrente', JSON.stringify(info));
+            caricaDettagliEventoSalvati();
+            alert("Dettagli evento salvati con successo!");
+        }
+
+        // --- GESTIONE VERIFICA ISCRIZIONE AUTONOMA ---
+        function gestisciInvioRicerca(event) {
+            if (event.key === 'Enter') {
+                cercaIscrizioneAutonoma();
+            }
+        }
+
+        function cercaIscrizioneAutonoma() {
+            let query = document.getElementById('inputCercaIscrizionePubblica').value.trim().toLowerCase();
+            let container = document.getElementById('containerRisultatiVerifica');
+
+            if (!query) {
+                container.innerHTML = `
+                    <div class="alert alert-warning text-center mb-0" role="alert">
+                        ⚠️️ Inserisci un cognome o una società per effettuare la ricerca.
+                    </div>`;
                 return;
             }
 
-            let righe = document.querySelectorAll('#righeAtletiBody tr');
-            let novosAtleti = [];
+            let atletiList = JSON.parse(localStorage.getItem('atleti')) || [];
+            let infoEvento = JSON.parse(localStorage.getItem('infoEventoCorrente')) || {};
 
-            righe.forEach(r => {
-                let nome = r.querySelector('.atl-nome').value.trim();
-                let cognome = r.querySelector('.atl-cognome').value.trim();
-                let dataNascita = r.querySelector('.atl-nascita').value;
-                let sesso = r.querySelector('.atl-sesso').value;
-                let cintura = r.querySelector('.atl-cintura').value;
-                let specialita = r.querySelector('.atl-specialita').value;
-                let peso = parseFloat(r.querySelector('.atl-peso').value) || 0;
+            let trovati = atletiList.filter(a => {
+                let nomeCompleto = `${a.nome || ''} ${a.cognome || ''}`.toLowerCase();
+                let societa = (a.societa || '').toLowerCase();
+                return nomeCompleto.includes(query) || societa.includes(query);
+            });
 
-                if (nome && cognome) {
-                    novosAtleti.push({
-                        id: Date.now() + Math.random(),
-                        nome,
-                        cognome,
-                        dataNascita,
-                        sesso,
-                        cintura,
-                        specialita,
-                        peso,
-                        societa: nomeSoc,
-                        torneo: nomeTorneo
-                    });
+            if (trovati.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-danger text-center mb-0" role="alert">
+                        ❌ Nessuna iscrizione trovata per "<strong>${query}</strong>". Controlla di aver scritto correttamente o contatta l'organizzazione del torneo.
+                    </div>`;
+                return;
+            }
+
+            let html = `<h5 class="fw-bold text-success mb-3 text-center">Trovate n. ${trovati.length} iscrizioni corrette:</h5><div class="row g-3">`;
+            
+            trovati.forEach(a => {
+                let eta = calcolaEta(a.dataNascita);
+                html += `
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100 border-success bg-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="fw-bold text-success mb-0">🥋 ${a.cognome || ''} ${a.nome || ''}</h5>
+                                    <span class="badge bg-success">Confermata ✅</span>
+                                </div>
+                                <hr class="my-2">
+                                <p class="small text-secondary mb-1">📍 <strong>Società:</strong> ${a.societa || '-'}</p>
+                                <p class="small text-secondary mb-1">🎂 <strong>Età:</strong> ${eta} anni (${a.dataNascita || 'N.D.'})</p>
+                                <p class="small text-secondary mb-1">🚻 <strong>Sesso:</strong> ${a.sesso || '-'}</p>
+                                <p class="small text-secondary mb-1">🥋 <strong>Cintura:</strong> ${a.cintura || '-'}</p>
+                                <p class="small text-secondary mb-0">🏆 <strong>Specialità:</strong> ${a.specialita || '-'}</p>
+                            </div>
+                            <div class="card-footer bg-light text-muted small py-1">
+                                📅 Evento: ${infoEvento.nome || 'Torneo Karate'} (${infoEvento.data || 'Data da definire'})
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        // --- GESTIONE GIORNATE TORNEO ---
+        function apriModalNuovaGiornata() {
+            let modal = new bootstrap.Modal(document.getElementById('modalGiornate'));
+            modal.show();
+            mostraListaGiornateModal();
+        }
+
+        function aggiungiGiornataTorneo() {
+            let nomeGiornata = document.getElementById('inputNomeGiornata').value.trim();
+            if (!nomeGiornata) {
+                alert("Inserisci il nome della giornata!");
+                return;
+            }
+            let giornate = JSON.parse(localStorage.getItem('giornateTorneoList')) || [];
+            giornate.push({ id: Date.now(), nome: nomeGiornata });
+            localStorage.setItem('giornateTorneoList', JSON.stringify(giornate));
+            document.getElementById('inputNomeGiornata').value = '';
+            mostraListaGiornateModal();
+            popolaSelectGiornate();
+            alert("Giornata aggiunta con successo!");
+        }
+
+        function mostraListaGiornateModal() {
+            let giornate = JSON.parse(localStorage.getItem('giornateTorneoList')) || [];
+            let ul = document.getElementById('listaGiornateModal');
+            if (giornate.length === 0) {
+                ul.innerHTML = '<li class="list-group-item text-muted">Nessuna giornata aggiunta.</li>';
+                return;
+            }
+            let html = '';
+            giornate.forEach((g, index) => {
+                html += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>${g.nome}</span>
+                    <button class="btn btn-sm btn-danger" onclick="eliminaGiornata(${index})">🗑️</button>
+                </li>`;
+            });
+            ul.innerHTML = html;
+        }
+
+        function eliminaGiornata(index) {
+            let giornate = JSON.parse(localStorage.getItem('giornateTorneoList')) || [];
+            giornate.splice(index, 1);
+            localStorage.setItem('giornateTorneoList', JSON.stringify(giornate));
+            mostraListaGiornateModal();
+            popolaSelectGiornate();
+            aggiornaTabellaClassifiche();
+        }
+
+        function popolaSelectGiornate() {
+            let giornate = JSON.parse(localStorage.getItem('giornateTorneoList')) || [];
+            let select = document.getElementById('selezionaGiornataFiltro');
+            let currentVal = select.value;
+            let html = '<option value="TUTTE">📅 Tutte le Giornate</option>';
+            giornate.forEach(g => {
+                html += `<option value="${g.nome}">${g.nome}</option>`;
+            });
+            select.innerHTML = html;
+            select.value = currentVal;
+        }
+
+        function selezionaSpecClassifica(spec) {
+            specCorrenteClassifica = spec;
+            aggiornaTabellaClassifiche();
+        }
+
+        // --- CALCOLO CLASSIFICHE SEPARATE KATA / KUMITE ---
+        function aggiornaTabellaClassifiche() {
+            let atletiList = JSON.parse(localStorage.getItem('atleti')) || [];
+            let giornataFiltro = document.getElementById('selezionaGiornataFiltro').value;
+            let risultatiSalvati = JSON.parse(localStorage.getItem('risultatiPodioTorneo')) || [];
+
+            // Filtraggio per giornata se specificata nei risultati
+            let risultatiFiltrati = risultatiSalvati.filter(r => {
+                if (giornataFiltro === 'TUTTE') return true;
+                return r.giornata === giornataFiltro;
+            });
+
+            // Strutture dati separate Kata e Kumite
+            let socKata = {};
+            let atlKata = {};
+            let socKumite = {};
+            let atlKumite = {};
+
+            atletiList.forEach(a => {
+                if (a.specialita === 'Kata' || a.specialita === 'Entrambi') {
+                    if (!socKata[a.societa]) socKata[a.societa] = { nome: a.societa, ori: 0, argenti: 0, bronzi: 0, punti: 0 };
+                }
+                if (a.specialita === 'Kumite' || a.specialita === 'Entrambi') {
+                    if (!socKumite[a.societa]) socKumite[a.societa] = { nome: a.societa, ori: 0, argenti: 0, bronzi: 0, punti: 0 };
                 }
             });
 
-            if (novosAtleti.length === 0) {
-                alert("Inserisci almeno un atleta valido con Nome e Cognome!");
+            risultatiFiltrati.forEach(r => {
+                let pt = r.posizione === 1 ? 10 : (r.posizione === 2 ? 6 : (r.posizione === 3 ? 3 : 0));
+                if (r.specialita === 'Kata') {
+                    if (socKata[r.societa]) {
+                        if (r.posizione === 1) socKata[r.societa].ori++;
+                        if (r.posizione === 2) socKata[r.societa].argenti++;
+                        if (r.posizione === 3) socKata[r.societa].bronzi++;
+                        socKata[r.societa].punti += pt;
+                    }
+                } else if (r.specialita === 'Kumite') {
+                    if (socKumite[r.societa]) {
+                        if (r.posizione === 1) socKumite[r.societa].ori++;
+                        if (r.posizione === 2) socKumite[r.societa].argenti++;
+                        if (r.posizione === 3) socKumite[r.societa].bronzi++;
+                        socKumite[r.societa].punti += pt;
+                    }
+                }
+            });
+
+            // Render Tabella Società Kata
+            let arrSocKata = Object.values(socKata).sort((a, b) => b.punti - a.punti);
+            let htmlSocKata = arrSocKata.length === 0 || arrSocKata.every(s => s.punti === 0) ? 
+                `<tr><td colspan="6" class="text-center text-muted py-3">Nessun podio Kata registrato.</td></tr>` :
+                arrSocKata.map((s, idx) => `<tr><td>#${idx+1}</td><td><strong>${s.nome}</strong></td><td class="text-center"><span class="badge bg-warning text-dark">${s.ori}</span></td><td class="text-center"><span class="badge bg-secondary">${s.argenti}</span></td><td class="text-center"><span class="badge bg-danger">${s.bronzi}</span></td><td class="text-center fw-bold text-primary">${s.punti} pt</td></tr>`).join('');
+            document.getElementById('tabSocKata').innerHTML = htmlSocKata;
+
+            // Render Tabella Atleti Kata (Vuota o con dati)
+            document.getElementById('tabAtlKata').innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Aggiornamento automatico dai tabelloni Kata.</td></tr>`;
+
+            // Render Tabella Società Kumite
+            let arrSocKumite = Object.values(socKumite).sort((a, b) => b.punti - a.punti);
+            let htmlSocKumite = arrSocKumite.length === 0 || arrSocKumite.every(s => s.punti === 0) ? 
+                `<tr><td colspan="6" class="text-center text-muted py-3">Nessun podio Kumite registrato.</td></tr>` :
+                arrSocKumite.map((s, idx) => `<tr><td>#${idx+1}</td><td><strong>${s.nome}</strong></td><td class="text-center"><span class="badge bg-warning text-dark">${s.ori}</span></td><td class="text-center"><span class="badge bg-secondary">${s.argenti}</span></td><td class="text-center"><span class="badge bg-danger">${s.bronzi}</span></td><td class="text-center fw-bold text-success">${s.punti} pt</td></tr>`).join('');
+            document.getElementById('tabSocKumite').innerHTML = htmlSocKumite;
+
+            // Render Tabella Atleti Kumite (Vuota o con dati)
+            document.getElementById('tabAtlKumite').innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Aggiornamento automatico dai tabelloni Kumite.</td></tr>`;
+        }
+
+        function archiviaEventoCorrente() {
+            let info = JSON.parse(localStorage.getItem('infoEventoCorrente')) || {};
+            let nomeEvento = info.nome || "Evento Senza Nome (" + new Date().toLocaleDateString() + ")";
+            let archivio = JSON.parse(localStorage.getItem('archivioEventiList')) || [];
+
+            let eventoArchiviato = {
+                id: Date.now(),
+                nome: nomeEvento,
+                luogo: info.luogo || '-',
+                data: info.data || '-',
+                locandina: info.locandina || '',
+                societaList: JSON.parse(localStorage.getItem('societaList')) || [],
+                atletiList: JSON.parse(localStorage.getItem('atleti')) || [],
+                dataArchiviazione: new Date().toLocaleString()
+            };
+
+            archivio.push(eventoArchiviato);
+            localStorage.setItem('archivioEventiList', JSON.stringify(archivio));
+            caricaStoricoEventi();
+            alert(`L'evento "${nomeEvento}" è stato archiviato correttamente nello storico!`);
+        }
+
+        function caricaStoricoEventi() {
+            let archivio = JSON.parse(localStorage.getItem('archivioEventiList')) || [];
+            let container = document.getElementById('containerArchivio');
+
+            if (archivio.length === 0) {
+                container.innerHTML = '<p class="text-muted">Nessun evento archiviato nello storico.</p>';
                 return;
             }
 
-            let datiSocietaCompleti = {
-                id: Date.now(),
-                nomeTorneo: nomeTorneo,
-                locandina: "locandina.jpg",
-                nome: nomeSoc,
-                tecnico: nomeTec,
-                email: emailSoc,
-                telefono: telSoc,
-                logo: logoBase64Temp,
-                fotoTecnico: fotoTecnicoBase64Temp,
-                dataRegistrazione: new Date().toLocaleString()
-            };
-
-            if (usaFirebase) {
-                database.ref('iscrizioni_pendenti/' + datiSocietaCompleti.id).set({
-                    societa: datiSocietaCompleti,
-                    atleti: novosAtleti
-                }, (error) => {
-                    if (error) {
-                        alert("Errore durante l'invio su Firebase: " + error.message);
-                    } else {
-                        // Invio email con il template ID corretto (template_cexv9ys)
-                        let templateParams = {
-                            societa_nome: nomeSoc,
-                            tecnico_nome: nomeTec,
-                            num_atleti: novosAtleti.length,
-                            nome_torneo: nomeTorneo,
-                            email_societa: emailSoc || "Non specificata",
-                            telefono_societa: telSoc || "Non specificato"
-                        };
-
-                        emailjs.send('service_17vqdun', 'template_cexv9ys', templateParams)
-                            .then(function(response) {
-                                console.log('Email inviata con successo!', response.status, response.text);
-                            }, function(error) {
-                                console.log('Errore invio email:', error);
-                            });
-
-                        mostraSuccesso();
-                    }
-                });
-            } else {
-                alert("Errore di connessione a Firebase.");
-            }
+            let html = '';
+            archivio.forEach((ev, index) => {
+                html += `
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-white shadow-sm">
+                            <h5 class="fw-bold text-success text-truncate">${ev.nome}</h5>
+                            <p class="small text-muted mb-1">📍 ${ev.luogo} | 📅 ${ev.data}</p>
+                            <p class="small text-secondary mb-2">Archiviato il: ${ev.dataArchiviazione}</p>
+                            <button class="btn btn-sm btn-outline-primary w-100" onclick="visualizzaEventoArchiviato(${index})">👁️ Rivedi Evento</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
         }
 
-        function mostraSuccesso() {
-            document.getElementById('messaggioStato').innerHTML = `
-                <div class="alert alert-success text-center fw-bold py-3 shadow">
-                    🎉 <strong>Iscrizione inviata con successo!</strong><br>
-                    I dati sono stati registrati correttamente e la notifica è stata spedita.
-                </div>
-            `;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        function visualizzaEventoArchiviato(index) {
+            let archivio = JSON.parse(localStorage.getItem('archivioEventiList')) || [];
+            let ev = archivio[index];
+            if (!ev) return;
 
-            document.getElementById('regNomeSocieta').value = '';
-            document.getElementById('regNomeTecnico').value = '';
-            document.getElementById('regEmailSocieta').value = '';
-            document.getElementById('regTelSocieta').value = '';
-            document.getElementById('logoPreview').style.display = 'none';
-            document.getElementById('fotoTecnicoPreview').style.display = 'none';
-            logoBase64Temp = "";
-            fotoTecnicoBase64Temp = "";
+            document.getElementById('modalStoricoTitolo').innerText = `Storico: ${ev.nome}`;
+            let imgHtml = ev.locandina ? `<div class="text-center mb-3"><img src="${ev.locandina}" style="max-height: 200px;" class="rounded border"></div>` : '';
             
-            document.getElementById('righeAtletiBody').innerHTML = '';
-            aggiungiRigaAtletaForm();
+            let html = `
+                ${imgHtml}
+                <p><strong>Luogo:</strong> ${ev.luogo}</p>
+                <p><strong>Data:</strong> ${ev.data}</p>
+                <p><strong>Totale Società:</strong> ${ev.societaList.length} | <strong>Totale Atleti:</strong> ${ev.atletiList.length}</p>
+                <hr>
+                <h6 class="fw-bold">Elenco Atleti in questo evento archiviato:</h6>
+                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                    <table class="table table-sm table-striped">
+                        <thead><tr><th>Nome</th><th>Società</th><th>Specialità</th></tr></thead>
+                        <tbody>
+            `;
+
+            if (ev.atletiList.length === 0) {
+                html += `<tr><td colspan="3" class="text-center text-muted">Nessun atleta registrato.</td></tr>`;
+            } else {
+                ev.atletiList.forEach(a => {
+                    html += `<tr><td>${a.nome} ${a.cognome}</td><td>${a.societa}</td><td>${a.specialita}</td></tr>`;
+                });
+            }
+
+            html += `</tbody></table></div>`;
+            document.getElementById('modalStoricoBody').innerHTML = html;
+            let modal = new bootstrap.Modal(document.getElementById('modalStorico'));
+            modal.show();
+        }
+
+        function caricaReportEvento() {
+            let societaList = JSON.parse(localStorage.getItem('societaList')) || [];
+            let atletiList = JSON.parse(localStorage.getItem('atleti')) || [];
+
+            document.getElementById('statSocieta').innerText = societaList.length;
+            document.getElementById('statAtletiTotali').innerText = atletiList.length;
+
+            let tabelloniKataSet = new Set();
+            atletiList.filter(a => a.specialita === 'Kata' || a.specialita === 'Entrambi').forEach(a => {
+                let eta = calcolaEta(a.dataNascita);
+                tabelloniKataSet.add(`${eta}_${a.sesso || 'M'}`);
+            });
+            document.getElementById('statTabelloniKata').innerText = tabelloniKataSet.size;
+
+            let tabelloniKumiteSet = new Set();
+            atletiList.filter(a => a.specialita === 'Kumite' || a.specialita === 'Entrambi').forEach(a => {
+                let eta = calcolaEta(a.dataNascita);
+                tabelloniKumiteSet.add(`${eta}_${a.sesso || 'M'}`);
+            });
+            document.getElementById('statTabelloniKumite').innerText = tabelloniKumiteSet.size;
+
+            let logoSalvato = localStorage.getItem('logoPrincipale');
+            if(logoSalvato) {
+                document.getElementById('containerLogoPrincipale').innerHTML = `<img src="${logoSalvato}" class="logo-societa shadow-sm border" alt="Logo">`;
+            }
+
+            caricaListaGPG();
+        }
+
+        function caricaListaGPG() {
+            let atletiList = JSON.parse(localStorage.getItem('atleti')) || [];
+            let tbody = document.getElementById('tabellaGPGBody');
+            let atletiU10 = atletiList.filter(a => calcolaEta(a.dataNascita) <= 9);
+
+            if (atletiU10.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Nessun bambino Under 10 registrato nel sistema.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            atletiU10.forEach((a, index) => {
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${a.nome} ${a.cognome}</strong></td>
+                        <td>${calcolaEta(a.dataNascita)} anni</td>
+                        <td>${a.sesso || '-'}</td>
+                        <td>${a.societa || '-'}</td>
+                        <td><span class="badge bg-secondary">${a.cintura || 'Bianca'}</span></td>
+                        <td class="text-center"><span class="badge bg-success px-3 py-2">🤝 Partecipazione Conclusa (Senza Vinti né Vincitori)</span></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // --- FUNZIONE STAMPA LISTA ATLETI PER SOCIETA' ---
+        function stampaListaPerSocieta() {
+            let atleti = JSON.parse(localStorage.getItem('atleti')) || [];
+            let info = JSON.parse(localStorage.getItem('infoEventoCorrente')) || {};
+            let areaStampa = document.getElementById('areaStampaSocieta');
+
+            if (atleti.length === 0) {
+                alert("Nessun atleta registrato nel sistema da stampare!");
+                return;
+            }
+
+            // Raggruppamento atleti per Società
+            let societaGroup = {};
+            atleti.forEach(a => {
+                let soc = a.societa || 'Senza Società';
+                if (!societaGroup[soc]) societaGroup[soc] = [];
+                societaGroup[soc].push(a);
+            });
+
+            let html = '';
+            Object.keys(societaGroup).sort().forEach(socName => {
+                let lista = societaGroup[socName];
+                html += `
+                    <div class="pagina-societa p-4 border bg-white mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <div>
+                                <h2 class="fw-bold mb-0">${info.nome || 'Torneo Karate'}</h2>
+                                <p class="text-muted mb-0">📍 ${info.luogo || 'N.D.'} | 📅 ${info.data || 'N.D.'}</p>
+                            </div>
+                            <div class="text-end">
+                                <h3 class="fw-bold text-primary mb-0">${socName}</h3>
+                                <p class="small text-muted mb-0">Totale Atleti Iscritti: ${lista.length}</p>
+                            </div>
+                        </div>
+                        <h5 class="fw-bold mb-3">Elenco Atleti Iscritti</h5>
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Cognome e Nome</th>
+                                    <th style="width: 80px;">Sesso</th>
+                                    <th style="width: 80px;">Età</th>
+                                    <th>Cintura</th>
+                                    <th>Specialità</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                lista.forEach((a, i) => {
+                    html += `
+                        <tr>
+                            <td>${i + 1}</td>
+                            <td><strong>${a.cognome || ''} ${a.nome || ''}</strong></td>
+                            <td>${a.sesso || '-'}</td>
+                            <td>${calcolaEta(a.dataNascita)} anni</td>
+                            <td>${a.cintura || '-'}</td>
+                            <td>${a.specialita || '-'}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
+
+            areaStampa.innerHTML = html;
+            window.print();
         }
     </script>
 </body>
