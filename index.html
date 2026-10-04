@@ -13,38 +13,23 @@
         .classifica-card { border-left: 5px solid #6610f2; background: #f8f6fc; }
         .verifica-card { border-left: 5px solid #0dcaf0; background: #f0fbfe; }
 
-        /* Stili specifici per la Stampa */
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #areaStampaSocieta, #areaStampaSocieta * {
-                visibility: visible;
-            }
-            #areaStampaSocieta {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-            .pagina-societa {
-                page-break-after: always;
-                margin-bottom: 20px;
-            }
+            body * { visibility: hidden; }
+            #areaStampaSocieta, #areaStampaSocieta * { visibility: visible; }
+            #areaStampaSocieta { position: absolute; left: 0; top: 0; width: 100%; }
+            .pagina-societa { page-break-after: always; margin-bottom: 20px; }
         }
     </style>
 </head>
 <body class="bg-light" onload="caricaInizialeIndex()">
     <div class="container my-5">
         
-        <!-- Intestazione e Logo -->
         <div class="text-center mb-4">
             <div id="containerLogoPrincipale" class="mb-2"></div>
             <h1 id="titoloEventoHeader" class="fw-bold">🥋 Piattaforma Gestionale Torneo Karate I.K.S.A.</h1>
             <p id="sottotitoloEventoHeader" class="text-muted">Gestione completa di Società, Atleti, Tabelloni, Classifiche Kata/Kumite e G.P.G.</p>
         </div>
 
-        <!-- Menu di Navigazione Principale -->
         <div class="row text-center mb-4 g-2">
             <div class="col-md-2"><a href="index.html" class="btn btn-primary w-100 py-3 shadow-sm">Home & Report</a></div>
             <div class="col-md-2"><a href="societa.html" class="btn btn-outline-primary w-100 py-3 shadow-sm">Società & Tecnici</a></div>
@@ -54,7 +39,6 @@
             <div class="col-md-2"><a href="#sezioneVerificaIscrizione" class="btn btn-info text-white w-100 py-3 shadow-sm fw-bold">🔍 Verifica Iscrizione</a></div>
         </div>
 
-        <!-- SEZIONE: Verifica Iscrizione in Autonomia per Utenti/Società -->
         <div id="sezioneVerificaIscrizione" class="card shadow-sm p-4 mb-4 verifica-card">
             <div class="text-center mb-3">
                 <h3 class="text-info text-dark fw-bold mb-1">🔍 Verifica la tua Iscrizione in Autonomia</h3>
@@ -68,12 +52,9 @@
                     </div>
                 </div>
             </div>
-            <div id="containerRisultatiVerifica" class="mt-4">
-                <!-- I risultati compariranno qui -->
-            </div>
+            <div id="containerRisultatiVerifica" class="mt-4"></div>
         </div>
 
-        <!-- Sezione Configurazione & Dettagli Evento + Locandina -->
         <div class="card shadow-sm p-4 mb-4 evento-card">
             <h3 class="mb-3 text-success">🏆 Configurazione Evento & Locandina</h3>
             <div class="row g-3 align-items-center">
@@ -106,7 +87,6 @@
             </div>
         </div>
 
-        <!-- SEZIONE: Classifiche Separate Kata e Kumite (con Giornate) -->
         <div class="card shadow-sm p-4 mb-4 classifica-card">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
@@ -121,7 +101,6 @@
                 </div>
             </div>
 
-            <!-- Tab Principali: Kata vs Kumite -->
             <ul class="nav nav-pills mb-3" id="specialitaClassificaTab" role="tablist">
                 <li class="nav-item me-2" role="presentation">
                     <button class="nav-link active fw-bold" id="pill-kata" data-bs-toggle="pill" data-bs-target="#pane-kata" type="button" onclick="selezionaSpecClassifica('Kata')">🥋 Classifica KATA</button>
@@ -132,8 +111,6 @@
             </ul>
 
             <div class="tab-content bg-white p-3 rounded shadow-sm border" id="specialitaClassificaContent">
-                
-                <!-- PANE KATA -->
                 <div class="tab-pane fade show active" id="pane-kata" role="tabpanel">
                     <h5 class="fw-bold text-primary mb-3">📊 Classifiche Kata (Società & Atleti)</h5>
                     <div class="row">
@@ -166,7 +143,6 @@
                     </div>
                 </div>
 
-                <!-- PANE KUMITE -->
                 <div class="tab-pane fade" id="pane-kumite" role="tabpanel">
                     <h5 class="fw-bold text-success mb-3">📊 Classifiche Kumite (Società & Atleti)</h5>
                     <div class="row">
@@ -198,11 +174,9 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
 
-        <!-- Sezione Storico Eventi Archiviati -->
         <div class="card shadow-sm p-4 mb-4">
             <h3 class="mb-3 text-secondary">📂 Archivio Storico Eventi</h3>
             <div id="containerArchivio" class="row g-3">
@@ -210,7 +184,6 @@
             </div>
         </div>
 
-        <!-- Sezione Report Completo dell'Evento -->
         <div class="card shadow-sm p-4 mb-4 card-stat">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="text-primary mb-0">📊 Report Completo dell'Evento Attuale</h3>
@@ -244,7 +217,6 @@
             </div>
         </div>
 
-        <!-- Sezione Gran Premio Giovanissimi (G.P.G.) U10 -->
         <div class="card shadow-sm p-4 mb-4 gpg-card">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
@@ -276,10 +248,8 @@
 
     </div>
 
-    <!-- Contenitore Nascosto per la Generazione e Stampa della Lista per Società -->
     <div id="areaStampaSocieta" class="d-none d-print-block"></div>
 
-    <!-- Modale Gestione Giornate Torneo -->
     <div class="modal fade" id="modalGiornate" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -306,7 +276,6 @@
         </div>
     </div>
 
-    <!-- Modale per Visualizzare Evento Archiviato -->
     <div class="modal fade" id="modalStorico" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -314,9 +283,7 @@
                     <h5 class="modal-title" id="modalStoricoTitolo">Dettagli Evento Archiviato</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" id="modalStoricoBody">
-                    <!-- Contenuto dinamico -->
-                </div>
+                <div class="modal-body" id="modalStoricoBody"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
                 </div>
@@ -388,7 +355,6 @@
             alert("Dettagli evento salvati con successo!");
         }
 
-        // --- GESTIONE VERIFICA ISCRIZIONE AUTONOMA ---
         function gestisciInvioRicerca(event) {
             if (event.key === 'Enter') {
                 cercaIscrizioneAutonoma();
@@ -402,7 +368,7 @@
             if (!query) {
                 container.innerHTML = `
                     <div class="alert alert-warning text-center mb-0" role="alert">
-                        ⚠️️ Inserisci un cognome o una società per effettuare la ricerca.
+                        ⚠ Inserisci un cognome o una società per effettuare la ricerca.
                     </div>`;
                 return;
             }
@@ -419,7 +385,7 @@
             if (trovati.length === 0) {
                 container.innerHTML = `
                     <div class="alert alert-danger text-center mb-0" role="alert">
-                        ❌ Nessuna iscrizione trovata per "<strong>${query}</strong>". Controlla di aver scritto correttamente o contatta l'organizzazione del torneo.
+                        ❌ Nessuna iscrizione trovata per "<strong>${query}</strong>". Controlla di aver scritto correttamente o contatta l'organizzazione.
                     </div>`;
                 return;
             }
@@ -455,7 +421,6 @@
             container.innerHTML = html;
         }
 
-        // --- GESTIONE GIORNATE TORNEO ---
         function apriModalNuovaGiornata() {
             let modal = new bootstrap.Modal(document.getElementById('modalGiornate'));
             modal.show();
@@ -520,23 +485,18 @@
             aggiornaTabellaClassifiche();
         }
 
-        // --- CALCOLO CLASSIFICHE SEPARATE KATA / KUMITE ---
         function aggiornaTabellaClassifiche() {
             let atletiList = JSON.parse(localStorage.getItem('atleti')) || [];
             let giornataFiltro = document.getElementById('selezionaGiornataFiltro').value;
             let risultatiSalvati = JSON.parse(localStorage.getItem('risultatiPodioTorneo')) || [];
 
-            // Filtraggio per giornata se specificata nei risultati
             let risultatiFiltrati = risultatiSalvati.filter(r => {
                 if (giornataFiltro === 'TUTTE') return true;
                 return r.giornata === giornataFiltro;
             });
 
-            // Strutture dati separate Kata e Kumite
             let socKata = {};
-            let atlKata = {};
             let socKumite = {};
-            let atlKumite = {};
 
             atletiList.forEach(a => {
                 if (a.specialita === 'Kata' || a.specialita === 'Entrambi') {
@@ -566,24 +526,20 @@
                 }
             });
 
-            // Render Tabella Società Kata
             let arrSocKata = Object.values(socKata).sort((a, b) => b.punti - a.punti);
             let htmlSocKata = arrSocKata.length === 0 || arrSocKata.every(s => s.punti === 0) ? 
                 `<tr><td colspan="6" class="text-center text-muted py-3">Nessun podio Kata registrato.</td></tr>` :
                 arrSocKata.map((s, idx) => `<tr><td>#${idx+1}</td><td><strong>${s.nome}</strong></td><td class="text-center"><span class="badge bg-warning text-dark">${s.ori}</span></td><td class="text-center"><span class="badge bg-secondary">${s.argenti}</span></td><td class="text-center"><span class="badge bg-danger">${s.bronzi}</span></td><td class="text-center fw-bold text-primary">${s.punti} pt</td></tr>`).join('');
             document.getElementById('tabSocKata').innerHTML = htmlSocKata;
 
-            // Render Tabella Atleti Kata (Vuota o con dati)
             document.getElementById('tabAtlKata').innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Aggiornamento automatico dai tabelloni Kata.</td></tr>`;
 
-            // Render Tabella Società Kumite
             let arrSocKumite = Object.values(socKumite).sort((a, b) => b.punti - a.punti);
             let htmlSocKumite = arrSocKumite.length === 0 || arrSocKumite.every(s => s.punti === 0) ? 
                 `<tr><td colspan="6" class="text-center text-muted py-3">Nessun podio Kumite registrato.</td></tr>` :
                 arrSocKumite.map((s, idx) => `<tr><td>#${idx+1}</td><td><strong>${s.nome}</strong></td><td class="text-center"><span class="badge bg-warning text-dark">${s.ori}</span></td><td class="text-center"><span class="badge bg-secondary">${s.argenti}</span></td><td class="text-center"><span class="badge bg-danger">${s.bronzi}</span></td><td class="text-center fw-bold text-success">${s.punti} pt</td></tr>`).join('');
             document.getElementById('tabSocKumite').innerHTML = htmlSocKumite;
 
-            // Render Tabella Atleti Kumite (Vuota o con dati)
             document.getElementById('tabAtlKumite').innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Aggiornamento automatico dai tabelloni Kumite.</td></tr>`;
         }
 
@@ -725,7 +681,6 @@
             tbody.innerHTML = html;
         }
 
-        // --- FUNZIONE STAMPA LISTA ATLETI PER SOCIETA' ---
         function stampaListaPerSocieta() {
             let atleti = JSON.parse(localStorage.getItem('atleti')) || [];
             let info = JSON.parse(localStorage.getItem('infoEventoCorrente')) || {};
@@ -736,7 +691,6 @@
                 return;
             }
 
-            // Raggruppamento atleti per Società
             let societaGroup = {};
             atleti.forEach(a => {
                 let soc = a.societa || 'Senza Società';
